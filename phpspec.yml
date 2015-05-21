@@ -1,0 +1,5 @@
+suites:
+    main:
+        namespace: SimpleOMS
+        psr4_prefix: SimpleOMS
+        src_path: app
