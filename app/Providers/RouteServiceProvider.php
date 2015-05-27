@@ -25,6 +25,8 @@ class RouteServiceProvider extends ServiceProvider {
 		//
 		
 		parent::boot($router);
+
+        $router->model('order', 'SimpleOMS\Order');
 	}
 
 	/**

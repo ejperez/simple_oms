@@ -4,9 +4,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order_Detail extends Model {
 
-	//
-    public function order()
+    protected $table = 'order_details';
+
+    public function product()
     {
-        $this->hasOne('SimpleOMS\Order', 'id', 'order_id');
+        return $this->hasOne('SimpleOMS\Product', 'id', 'product_id');
     }
 }

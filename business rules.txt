@@ -1,0 +1,2 @@
+1. Quantity ordered must be less than or equal to current available quantity of product
+2. A customer cannot submit orders exceeding the remaining credit for the month

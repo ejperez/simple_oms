@@ -17,38 +17,49 @@ Route::controllers([
     'password' => 'Auth\PasswordController',
 ]);
 
-Route::get('home', [
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'sales', 'customer'],
-    'uses' => 'HomeController@index'
-]);
+Route::group(['middleware' => ['auth', 'roles']], function () {
 
-Route::get('orders', [
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'sales', 'customer'],
-    'uses' => 'OrdersController@index'
-]);
+    Route::get('home', [
+        'roles' => ['administrator', 'sales', 'customer'],
+        'uses' => 'HomeController@index'
+    ]);
 
-Route::get('create-order', [
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'customer'],
-    'uses' => 'OrdersController@create'
-]);
+    Route::get('orders', [
+        'roles' => ['administrator', 'sales', 'customer'],
+        'uses' => 'OrdersController@index'
+    ]);
 
-Route::get('get-products', [
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'customer', 'sales'],
-    'uses' => 'OrdersController@getProducts'
-]);
+    Route::get('create-order', [
+        'roles' => ['administrator', 'customer'],
+        'uses' => 'OrdersController@create'
+    ]);
 
-Route::get('get-cart', [
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'customer', 'sales'],
-    'uses' => 'OrdersController@getCart'
-]);
+    Route::post('store-order',[
+        'roles' => ['administrator', 'customer', 'sales'],
+        'uses' => 'OrdersController@storeOrder'
+    ]);
 
-Route::post('store-product-item',[
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['administrator', 'customer', 'sales'],
-    'uses' => 'OrdersController@storeProductItem'
-]);
+    Route::get('get-products-datatable', [
+        'roles' => ['administrator', 'customer', 'sales'],
+        'uses' => 'OrdersController@getProductsDataTable'
+    ]);
+
+    Route::get('get-transactions-datatable', [
+        'roles' => ['administrator', 'customer', 'sales'],
+        'uses' => 'OrdersController@getTransactionsDataTable'
+    ]);
+
+    Route::get('orders/{order}/edit', [
+        'roles' => ['administrator', 'customer', 'sales'],
+        'uses' => 'OrdersController@editOrder'
+    ]);
+
+    Route::group(['roles' => 'administrator'], function(){
+    });
+
+    Route::group(['roles' => 'sales'], function(){
+    });
+
+    Route::group(['roles' => 'customer'], function(){
+    });
+});
