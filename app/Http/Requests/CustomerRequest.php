@@ -1,6 +1,8 @@
 <?php namespace SimpleOMS\Http\Requests;
 
-class StoreOrderRequest extends Request {
+use SimpleOMS\Http\Requests\Request;
+
+class CustomerRequest extends Request {
 
 	/**
 	 * Determine if the user is authorized to make this request.
@@ -29,12 +31,12 @@ class StoreOrderRequest extends Request {
             case 'POST':
             {
                 return [
-                    'po_number'     => 'required|alpha_num|max:50|unique:orders,po_number',
-                    'order_date'    => 'required|date',
-                    'pickup_date'   => 'required|date|after:order_date',
-                    'product'       => 'array',
-                    'quantity'      => 'array',
-                    'unit_price'    => 'array'
+                    'first_name' => 'required',
+                    'last_name' => 'required',
+                    'billing_address' => 'required',
+                    'zip_code_id' => 'required|numeric|exists:zipcodes,id',
+                    'phone_no' => 'required',
+                    'credit_amount' => 'required|numeric',
                 ];
             }
             case 'PUT':
@@ -53,4 +55,5 @@ class StoreOrderRequest extends Request {
             default:break;
         }
 	}
+
 }

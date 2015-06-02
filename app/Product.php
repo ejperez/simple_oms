@@ -3,7 +3,11 @@
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model {
-	//
+
+    protected $fillable = ['category_id', 'name', 'unit_price', 'uom'];
+
+    public $timestamps = false;
+
     public function category()
     {
         return $this->belongsTo('SimpleOMS\Product_Category', 'category_id', 'id');

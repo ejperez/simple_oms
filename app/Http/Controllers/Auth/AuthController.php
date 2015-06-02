@@ -44,9 +44,9 @@ class AuthController extends Controller {
     }
 
     // Override for user logout
-    public function getLogout(){
+    /*public function getLogout(){
         Auth::logout();
         Session::flush();
         return Redirect::to('/');
-    }
+    }*/
 }

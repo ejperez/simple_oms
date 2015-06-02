@@ -65,4 +65,9 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     {
         return (strtolower($need_role)==strtolower($this->have_role->name)) ? true : false;
     }
+
+    public function customer()
+    {
+        return $this->hasOne('SimpleOMS\Customer', 'id', 'customer_id');
+    }
 }

@@ -4,8 +4,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product_Category extends Model {
 
-	//
     protected $table = 'product_category';
+
+    public $timestamps = false;
+
+    protected $fillable = ['name'];
 
     public function products()
     {

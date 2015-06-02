@@ -4,7 +4,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model {
 
-	//
+    protected $fillable = ['customer_id', 'employee_id', 'order_date', 'required_date'];
+
     public function details()
     {
         return $this->hasMany('SimpleOMS\Order_Detail', 'order_id', 'id');
@@ -12,12 +13,12 @@ class Order extends Model {
 
     public function status()
     {
-        return $this->belongsTo('SimpleOMS\Order_Status', 'status_id', 'id');
+        return $this->hasMany('SimpleOMS\Order_Order_Status', 'order_id', 'id');
     }
 
-    public function user()
+    public function customer()
     {
-        return $this->belongsTo('SimpleOMS\User', 'created_by', 'id');
+        return $this->belongsTo('SimpleOMS\Customer', 'customer_id', 'id');
     }
 
     public function userUpdate()

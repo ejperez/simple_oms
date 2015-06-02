@@ -17,49 +17,83 @@ Route::controllers([
     'password' => 'Auth\PasswordController',
 ]);
 
-Route::group(['middleware' => ['auth', 'roles']], function () {
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 'sales', 'approver']], function () {
 
-    Route::get('home', [
-        'roles' => ['administrator', 'sales', 'customer'],
-        'uses' => 'HomeController@index'
-    ]);
+    // home
+    Route::get('home', 'HomeController@index');
 
-    Route::get('orders', [
-        'roles' => ['administrator', 'sales', 'customer'],
-        'uses' => 'OrdersController@index'
-    ]);
+    // order history
+    Route::get('orders', 'OrdersController@index');
 
-    Route::get('create-order', [
-        'roles' => ['administrator', 'customer'],
-        'uses' => 'OrdersController@create'
-    ]);
+    // AJAX requests
+    Route::get('get-orders-datatable', 'DatatablesController@getOrders');
+    Route::get('search-address', function() {
+        $term = Input::get('term');
+        if(!empty($term)){
+            $term = '%'.$term.'%'; // Enclose in wildcards
+            $zipcodes = \SimpleOMS\Zipcode::where('major_area', 'like', $term)
+                ->where('city', 'like', $term, 'OR')
+                ->where('zip_code', 'like', $term, 'OR')
+                ->get();
 
-    Route::post('store-order',[
-        'roles' => ['administrator', 'customer', 'sales'],
-        'uses' => 'OrdersController@storeOrder'
-    ]);
+            return json_encode($zipcodes);
+        } else {
+            abort(404);
+        }
+    });
+    Route::get('search-products-by-category/{category}', function($category) {
+        $category->products;
+        return json_encode($category);
+    });
+});
 
-    Route::get('get-products-datatable', [
-        'roles' => ['administrator', 'customer', 'sales'],
-        'uses' => 'OrdersController@getProductsDataTable'
-    ]);
-
-    Route::get('get-transactions-datatable', [
-        'roles' => ['administrator', 'customer', 'sales'],
-        'uses' => 'OrdersController@getTransactionsDataTable'
-    ]);
-
-    Route::get('orders/{order}/edit', [
-        'roles' => ['administrator', 'customer', 'sales'],
-        'uses' => 'OrdersController@editOrder'
-    ]);
-
-    Route::group(['roles' => 'administrator'], function(){
+/*
+ * Administrator only
+ */
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator']], function(){
+    Route::get('users', function(){
+        return 'Users';
     });
 
-    Route::group(['roles' => 'sales'], function(){
+    Route::get('customers', function(){
+        return 'Customers';
     });
+});
 
-    Route::group(['roles' => 'customer'], function(){
-    });
+/*
+ * Sales only
+ */
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administrator']], function(){
+
+    /** ORDERS **/
+
+    // create order form
+    Route::get('orders/create', 'OrdersController@create');
+
+    // show order as readonly
+    Route::get('orders/{order}', 'OrdersController@show');
+
+    // create order
+    Route::post('orders','OrdersController@store');
+
+    // update order form
+    Route::get('orders/{order}/edit', 'OrdersController@edit');
+
+    // update order
+    Route::put('orders/{order}', 'OrdersController@update');
+
+    /** CUSTOMERS **/
+
+    // create customer form
+    Route::get('customers/create', 'CustomersController@create');
+
+    // create customer
+    Route::post('customers','CustomersController@store');
+});
+
+/*
+ * Approver only
+ */
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['approver']], function(){
+
 });

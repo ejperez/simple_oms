@@ -22,11 +22,11 @@ class RouteServiceProvider extends ServiceProvider {
 	 */
 	public function boot(Router $router)
 	{
-		//
-		
 		parent::boot($router);
 
+        // Model bindings
         $router->model('order', 'SimpleOMS\Order');
+        $router->model('category', 'SimpleOMS\Product_Category');
 	}
 
 	/**
