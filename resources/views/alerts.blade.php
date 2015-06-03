@@ -12,7 +12,7 @@
     </div>
 @endif
 
-@if (!is_null($errors))
+@if (count($errors) > 0)
     <div role="alert" class="alert alert-warning">
         <strong>Validation errors:</strong><br>
         @foreach ($errors->all() as $error)

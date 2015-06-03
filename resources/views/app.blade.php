@@ -26,6 +26,20 @@
             content:' *';
             color:red;
         }
+        table.dataTable tr{
+            cursor: pointer;
+        }
+        fieldset{
+            margin-top:2em;
+        }
+        div#div_total_amount label{
+            font-size:1.5em;
+            font-weight:bold;
+        }
+        div#div_total_amount table{
+            width:100%;
+            text-align:right
+        }
     </style>
 
     <!-- Custom CSS for page -->
@@ -53,19 +67,23 @@
 							<a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Orders <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">
                                 <li><a href="{{ url('orders') }}">View Orders</a></li>
-                                <li class="divider"></li>
-                                <li><a href="{{ url('orders/create') }}">Create Order</a></li>
+                                @if (Auth::user()->hasRole(['administrator', 'sales']))
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url('orders/create') }}">Create Order</a></li>
+                                @endif
                             </ul>
 						</li>
-                        <li class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Users <span class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="{{ url('users') }}">View Users</a></li>
-                                <li class="divider"></li>
-                                <li><a href="{{ url('users/create') }}">Create User</a></li>
-                            </ul>
-                        </li>
-						<li><a href="{{ url('/') }}">Audit Log</a></li>
+                        @if (Auth::user()->hasRole(['administrator']))
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Users <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{{ url('users') }}">View Users</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="{{ url('auth/register') }}">Register User</a></li>
+                                </ul>
+                            </li>
+						    <li><a href="{{ url('/') }}">Audit Log</a></li>
+                        @endif
 					@endif
 				</ul>
 
@@ -76,7 +94,22 @@
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ Auth::user()->name }}<span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">
-								<li><a href="{{ url('/') }}">Account Settings</a></li>
+                                <li>
+                                    <a href="#">
+                                        <table style="cursor:default">
+                                            <tr>
+                                                <td>Name&nbsp;</td>
+                                                <td>:&nbsp;<strong>{{ Auth::user()->customer->fullName() }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Role&nbsp;</td>
+                                                <td>:&nbsp;<strong>{{ Auth::user()->role->name }}</strong></td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+								<li><a href="{{ url('/') }}">Edit Account</a></li>
 								<li class="divider"></li>
 								<li><a href="{{ url('/auth/logout') }}">Logout</a></li>
 							</ul>
@@ -97,6 +130,29 @@
     {!! Html::script('plugins/datatables/media/js/jquery.dataTables.min.js') !!}
     {!! Html::script('plugins/handlebars/handlebars.min.js') !!}
     {!! Html::script('plugins/select2/dist/js/select2.min.js') !!}
+
+    <script id="options-template"  type="text/x-handlebars-template">
+        @{{#each products }}
+        <option value="@{{ id }}">@{{ name }}</option>
+        @{{/each }}
+    </script>
+
+    <script id="cart-row-template"  type="text/x-handlebars-template">
+        @{{#each items }}
+        <tr id="@{{ id }}" class="@{{#oddEven @index}}@{{/oddEven}}">
+            <td>@{{ name }}</td>
+            <td>@{{ category }}</td>
+            <td>@{{ uom }}</td>
+            <td>@{{ unit_price }}</td>
+            <td>
+                <input data-unit-price="@{{ unit_price }}" data-id="@{{ id }}" type="number" name="quantity[]" class="quantity" value="@{{ quantity }}"/>
+                <input type="hidden" name="product[]" value="@{{ id }}"/>
+                <input type="hidden" name="unit_price[]" value="@{{ unit_price }}"/>
+            </td>
+            <td class="price">0.00</td>
+        </tr>
+        @{{/each }}
+    </script>
 
     <script>
         // Datepicker fix

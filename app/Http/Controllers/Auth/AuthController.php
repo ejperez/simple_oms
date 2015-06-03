@@ -4,9 +4,11 @@ use SimpleOMS\Http\Controllers\Controller;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\Registrar;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
-use Auth;
+use Illuminate\Http\Request;
+use SimpleOMS\Role;
 use Session;
 use Redirect;
+use Auth;
 
 class AuthController extends Controller {
 
@@ -35,18 +37,49 @@ class AuthController extends Controller {
 		$this->auth = $auth;
 		$this->registrar = $registrar;
 
-		$this->middleware('guest', ['except' => 'getLogout']);
+		$this->middleware('guest', ['except' => ['getLogout', 'getRegister', 'postRegister']]);
 	}
 
     // Override for user registration
     public function getRegister(){
-        return redirect('auth/login');
+        // Only administrators can register users
+        if (Auth::check() && Auth::user()->hasRole(['administrator'])){
+            // Get list of roles
+            $roles = Role::all();
+            return view('auth.register', compact('roles'));
+        } else {
+            return response([
+                'error' => [
+                    'code' => 'INSUFFICIENT_ROLE',
+                    'description' => 'You are not authorized to access this resource.'
+                ]
+            ], 401);
+        }
     }
 
-    // Override for user logout
-    /*public function getLogout(){
+    public function postRegister(Request $request)
+    {
+        $validator = $this->registrar->validator($request->all());
+
+        if ($validator->fails())
+        {
+            $this->throwValidationException(
+                $request, $validator
+            );
+        }
+
+        // Create user
+        $user = $this->registrar->create($request->all());
+
+        // Redirect to list of orders
+        Session::flash('success', 'User "'.$user->name.'" was registered succesfully.');
+        return redirect('auth/register');
+    }
+
+    public function getLogout()
+    {
         Auth::logout();
         Session::flush();
         return Redirect::to('/');
-    }*/
+    }
 }

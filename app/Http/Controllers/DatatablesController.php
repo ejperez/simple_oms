@@ -3,6 +3,7 @@
 use SimpleOMS\Http\Requests;
 use Illuminate\Support\Collection;
 use Datatables;
+use Auth;
 use DB;
 
 class DatatablesController extends Controller {
@@ -13,7 +14,15 @@ class DatatablesController extends Controller {
      */
     public function getOrders()
     {
-        $orders = DB::table('orders_vw')->get();
+        // Approvers can view orders from all customers, but only with 'Pending' status
+        // Administrators and Sales can only view their orders
+
+        if (Auth::user()->hasRole(['approver'])){
+            $orders = DB::table('orders_vw')->where('status', '=', 'Pending')->get();
+        } else {
+            $orders = DB::table('orders_vw')->where('user_id', '=', Auth::user()->id)->get();
+        }
+
         $order_collection = new Collection();
 
         foreach ($orders as $order){
@@ -24,14 +33,14 @@ class DatatablesController extends Controller {
                 'pickup_date' => $order->pickup_date,
                 'customer' => $order->customer,
                 'total_amount' => $order->total_amount,
-                'status' => $order->status
+                'status' => $order->status,
+                'details' => DB::table('order_details_vw')->where('order_id', '=', $order->id)->get()
             ]);
         }
 
         return Datatables::of($order_collection)
             ->setRowId('id')
             ->setRowClass('status')
-            ->removeColumn('id')
             ->make(true);
     }
 }

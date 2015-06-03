@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 02, 2015 at 12:02 PM
+-- Generation Time: Jun 03, 2015 at 11:45 AM
 -- Server version: 5.6.21
 -- PHP Version: 5.6.3
 
@@ -51,24 +51,20 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `middle_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `last_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `company_id` int(10) unsigned NOT NULL,
-  `billing_address` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `city_town` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `province` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `zip_code` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `phone_no` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `fax_no` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `first_name`, `middle_name`, `last_name`, `company_id`, `billing_address`, `city_town`, `province`, `zip_code`, `country`, `phone_no`, `fax_no`, `created_at`, `updated_at`, `title`) VALUES
-(1, 'El John', 'Mondala', 'Perez', 1, 'San Lorezon', 'Norzagaray', 'Bulacan', '3013', 'PH', '09123823283', NULL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', NULL);
+INSERT INTO `customers` (`id`, `first_name`, `middle_name`, `last_name`, `company_id`, `created_at`, `updated_at`) VALUES
+(1, 'El John', 'Mondala', 'Perez', 1, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(2, 'Jessa', 'Naldoza', 'Acaso', 1, '2015-06-02 16:00:00', '2015-06-02 16:00:00'),
+(7, 'Jennifer', 'Brooks', 'Lawrence', 1, '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(8, 'Scarlette', 'Williams', 'Johanson', 1, '2015-06-03 06:13:15', '2015-06-03 06:13:15'),
+(9, 'Jem', 'Rodriguez', 'Milton', 1, '2015-06-03 06:14:22', '2015-06-03 06:14:22');
 
 -- --------------------------------------------------------
 
@@ -83,7 +79,17 @@ CREATE TABLE IF NOT EXISTS `customer_credits` (
   `credit_remaining` decimal(9,2) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `customer_credits`
+--
+
+INSERT INTO `customer_credits` (`id`, `customer_id`, `credit_amount`, `credit_remaining`, `created_at`, `updated_at`) VALUES
+(1, 7, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(2, 1, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(3, 2, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(4, 8, '50000.00', '50000.00', '2015-06-03 06:13:15', '2015-06-03 06:13:15');
 
 -- --------------------------------------------------------
 
@@ -157,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pickup_date` date DEFAULT NULL,
   `po_number` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `updated_by` int(10) unsigned DEFAULT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `orders`
@@ -165,11 +171,18 @@ CREATE TABLE IF NOT EXISTS `orders` (
 
 INSERT INTO `orders` (`id`, `customer_id`, `order_date`, `created_at`, `updated_at`, `pickup_date`, `po_number`, `updated_by`) VALUES
 (1, 1, '2015-06-02', '2015-06-02 06:53:13', '2015-06-02 06:53:13', '2015-06-08', 'PO', 1),
-(2, 1, '2015-06-10', '2015-06-02 06:55:47', '2015-06-02 06:55:47', '2015-06-16', 'POLOLOCCO', 0),
+(2, 1, '2015-06-10', '2015-06-02 06:55:47', '2015-06-03 01:35:25', '2015-06-16', 'POLOLOCCO', 1),
 (3, 1, '2015-06-18', '2015-06-02 07:17:45', '2015-06-02 07:17:45', '2015-06-24', 'POKOPO', 0),
 (4, 1, '2015-06-18', '2015-06-02 09:10:41', '2015-06-02 09:10:41', '2015-06-24', 'ASD', NULL),
-(5, 1, '2015-06-02', '2015-06-02 09:22:21', '2015-06-02 09:22:21', '2015-06-09', 'YOWNESS', NULL),
-(6, 1, '2015-06-16', '2015-06-02 09:26:09', '2015-06-02 09:26:09', '2015-06-23', 'GAMEOFPOS', NULL);
+(5, 1, '2015-06-04', '2015-06-02 09:22:21', '2015-06-03 06:27:36', '2015-06-11', 'YOWNESS', 8),
+(6, 1, '2015-06-16', '2015-06-02 09:26:09', '2015-06-02 09:26:09', '2015-06-23', 'GAMEOFPOS', NULL),
+(7, 1, '2015-06-10', '2015-06-03 02:04:03', '2015-06-03 02:04:03', '2015-06-17', 'YOBONESS', NULL),
+(8, 8, '2015-06-03', '2015-06-03 06:29:49', '2015-06-03 07:09:37', '2015-06-10', 'PO12323', 8),
+(9, 7, '2015-06-18', '2015-06-03 07:16:56', '2015-06-03 07:16:56', '2015-06-25', 'JLAWORDER', NULL),
+(10, 7, '2015-06-24', '2015-06-03 07:17:15', '2015-06-03 07:17:15', '2015-07-01', 'PAORDEROWAITER', NULL),
+(11, 7, '2015-07-04', '2015-06-03 07:17:49', '2015-06-03 07:17:49', '2015-07-11', 'PAORDERNIEDGAR', NULL),
+(12, 1, '2015-06-25', '2015-06-03 07:27:06', '2015-06-03 09:03:42', '2015-07-02', 'ADMINPO', 1),
+(13, 1, '2015-06-17', '2015-06-03 08:58:42', '2015-06-03 08:58:42', '2015-06-24', 'POKOTO', NULL);
 
 -- --------------------------------------------------------
 
@@ -178,6 +191,7 @@ INSERT INTO `orders` (`id`, `customer_id`, `order_date`, `created_at`, `updated_
 --
 CREATE TABLE IF NOT EXISTS `orders_vw` (
 `id` int(10) unsigned
+,`user_id` int(10) unsigned
 ,`po_number` varchar(255)
 ,`order_date` date
 ,`pickup_date` date
@@ -207,14 +221,44 @@ CREATE TABLE IF NOT EXISTS `order_details` (
 
 INSERT INTO `order_details` (`order_id`, `product_id`, `quantity`, `created_at`, `updated_at`, `unit_price`) VALUES
 (1, 3, 50, '2015-06-02 06:53:13', '2015-06-02 06:53:13', '20.00'),
-(2, 3, 20, '2015-06-02 06:55:47', '2015-06-02 06:55:47', '20.00'),
+(2, 3, 25, '2015-06-03 01:35:34', '2015-06-03 01:35:34', '20.00'),
 (3, 7, 10, '2015-06-02 07:17:45', '2015-06-02 07:17:45', '25.00'),
 (4, 1, 50, '2015-06-02 09:10:41', '2015-06-02 09:10:41', '25.00'),
 (4, 2, 100, '2015-06-02 09:10:41', '2015-06-02 09:10:41', '28.00'),
 (4, 4, 100, '2015-06-02 09:10:42', '2015-06-02 09:10:42', '35.00'),
-(5, 1, 100, '2015-06-02 09:22:21', '2015-06-02 09:22:21', '25.00'),
-(5, 3, 50, '2015-06-02 09:22:21', '2015-06-02 09:22:21', '20.00'),
-(6, 12, 2, '2015-06-02 09:26:09', '2015-06-02 09:26:09', '30.00');
+(5, 1, 100, '2015-06-03 06:27:36', '2015-06-03 06:27:36', '25.00'),
+(5, 3, 50, '2015-06-03 06:27:36', '2015-06-03 06:27:36', '20.00'),
+(6, 12, 2, '2015-06-02 09:26:09', '2015-06-02 09:26:09', '30.00'),
+(7, 2, 20, '2015-06-03 02:04:03', '2015-06-03 02:04:03', '28.00'),
+(7, 4, 50, '2015-06-03 02:04:03', '2015-06-03 02:04:03', '35.00'),
+(8, 1, 1000, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '25.00'),
+(8, 2, 20, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '28.00'),
+(8, 3, 25, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '20.00'),
+(8, 5, 45, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '32.00'),
+(9, 2, 50000, '2015-06-03 07:16:56', '2015-06-03 07:16:56', '28.00'),
+(10, 6, 20, '2015-06-03 07:17:16', '2015-06-03 07:17:16', '25.00'),
+(10, 7, 65, '2015-06-03 07:17:16', '2015-06-03 07:17:16', '25.00'),
+(10, 8, 22, '2015-06-03 07:17:16', '2015-06-03 07:17:16', '26.00'),
+(11, 11, 20, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '20.00'),
+(11, 12, 30, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '30.00'),
+(11, 13, 40, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '40.00'),
+(12, 8, 500, '2015-06-03 09:43:10', '2015-06-03 09:43:10', '26.00'),
+(13, 7, 500, '2015-06-03 08:58:42', '2015-06-03 08:58:42', '25.00');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `order_details_vw`
+--
+CREATE TABLE IF NOT EXISTS `order_details_vw` (
+`order_id` int(10) unsigned
+,`product` varchar(255)
+,`category` varchar(255)
+,`uom` varchar(255)
+,`unit_price` decimal(9,2) unsigned
+,`quantity` int(10) unsigned
+,`price` decimal(19,2) unsigned
+);
 
 -- --------------------------------------------------------
 
@@ -239,10 +283,23 @@ INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_a
 (1, 2, 1, '2015-06-02 15:39:41', '2015-06-01 16:00:00'),
 (1, 3, 1, '2015-06-02 15:59:59', '0000-00-00 00:00:00'),
 (2, 1, 1, '2015-06-02 06:55:47', '2015-06-02 06:55:47'),
+(2, 3, 1, '2015-06-03 02:30:44', '2015-06-03 02:30:44'),
 (3, 1, 1, '2015-06-02 07:17:45', '2015-06-02 07:17:45'),
+(3, 2, 1, '2015-06-03 02:30:33', '2015-06-03 02:30:33'),
 (4, 1, 1, '2015-06-02 09:10:42', '2015-06-02 09:10:42'),
+(4, 2, 1, '2015-06-03 02:30:26', '2015-06-03 02:30:26'),
 (5, 1, 1, '2015-06-02 09:22:21', '2015-06-02 09:22:21'),
-(6, 1, 1, '2015-06-02 09:26:09', '2015-06-02 09:26:09');
+(5, 4, 1, '2015-06-03 06:44:30', '2015-06-03 06:44:30'),
+(6, 1, 1, '2015-06-02 09:26:09', '2015-06-02 09:26:09'),
+(6, 3, 1, '2015-06-03 02:30:41', '2015-06-03 02:30:41'),
+(7, 1, 1, '2015-06-03 02:04:03', '2015-06-03 02:04:03'),
+(7, 3, 1, '2015-06-03 02:30:48', '2015-06-03 02:30:48'),
+(8, 1, 8, '2015-06-03 06:29:49', '2015-06-03 06:29:49'),
+(9, 1, 7, '2015-06-03 07:16:56', '2015-06-03 07:16:56'),
+(10, 1, 7, '2015-06-03 07:17:16', '2015-06-03 07:17:16'),
+(11, 1, 7, '2015-06-03 07:17:49', '2015-06-03 07:17:49'),
+(12, 1, 1, '2015-06-03 07:27:07', '2015-06-03 07:27:07'),
+(13, 1, 1, '2015-06-03 08:58:42', '2015-06-03 08:58:42');
 
 -- --------------------------------------------------------
 
@@ -360,19 +417,20 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`, `updated_at`) VA
 --
 
 CREATE TABLE IF NOT EXISTS `settings` (
-  `s_key` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `s_value` varchar(255) COLLATE utf8_unicode_ci NOT NULL
+  `id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `value` varchar(255) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `settings`
 --
 
-INSERT INTO `settings` (`s_key`, `s_value`) VALUES
+INSERT INTO `settings` (`id`, `value`) VALUES
 ('DATE_FORMAT', 'yyyy-mm-dd'),
 ('DATE_FORMAT_MYSQL_YMD', '%Y-%m-%d'),
 ('DATE_FORMAT_PHP', 'Y-m-d'),
 ('DEFAULT_CREDIT', '50000'),
+('MAX_QUANTITY', '500'),
 ('PESO_SYMBOL', '₱'),
 ('PICKUP_DAYS_COUNT', '7');
 
@@ -392,15 +450,18 @@ CREATE TABLE IF NOT EXISTS `users` (
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `role_id` tinyint(3) unsigned NOT NULL,
   `customer_id` int(10) unsigned NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `remember_token`, `created_at`, `updated_at`, `role_id`, `customer_id`) VALUES
-(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'LyWHS5jYBUnDgPeDXmjFbuSUVpsxorXaUxUelz2b15EeQKtogU4zYdwfMMl9', '2015-06-01 07:43:42', '2015-06-02 09:21:53', 1, 1),
-(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', 'y1FztnGBQar6nbhiNVDwGezAkHd10QGCxWmsSjBbLUJiC2uJMMGBf2tkytG1', '2015-06-01 07:44:06', '2015-06-01 07:44:14', 3, 2);
+(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'VwAqSfLdFkgzqpOgDgNPNj5CaUCJZeIBqrupPLD3jSNf0zZd5iHWBr1xdApD', '2015-06-01 07:43:42', '2015-06-03 07:21:21', 1, 1),
+(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', 'wx81LqcqsXrhXCPeSqp5dgXuiBXJ2PBiFD2s8yYJf0PLQ9UQsZfFLiGMJx8X', '2015-06-01 07:44:06', '2015-06-03 06:54:52', 3, 2),
+(7, 'jennifer_law', 'jennifer@lawrence.com', '$2y$10$QFiydHgJQnFJINtM/dhCEuRLLfM50xf1KmfUFeMGKRRxNvpYOPz02', 'MvaN4LpTWN4ULrTlhFypczFZHdB9NyHcIt1Z1Tz0InKu7z2lxNsTwULPeU2r', '2015-06-03 06:11:55', '2015-06-03 07:17:52', 1, 7),
+(8, 'scarlette', 'scar@lette.com', '$2y$10$EZuV4ipFaQ81u1ecGuRjWOiUARjtXZnJGouGoVJSYQI3AMTjdOdGK', '0Lkk5PYs7a36KyOskMlrVFEUhJjyUxAHSKuDT2ieBZYNH3GQue27vwfSub9I', '2015-06-03 06:13:15', '2015-06-03 07:15:13', 2, 8),
+(9, 'jem', 'jem@milton.com', '$2y$10$4u79ZNnxuv8kfdg4Ls2QLuzRJ8W8ZkVecBFra8cHWUYK4dPmgK58q', '0ZYrtsJ6QbxEevLNLuEKFhFlw5C3jvWlUDwluIjXTsLiY3VaO9d9iJMNpCRM', '2015-06-03 06:14:22', '2015-06-03 07:20:01', 3, 9);
 
 -- --------------------------------------------------------
 
@@ -2701,7 +2762,16 @@ INSERT INTO `zipcodes` (`id`, `country`, `major_area`, `zip_code`, `city`) VALUE
 --
 DROP TABLE IF EXISTS `orders_vw`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `orders_vw` AS select `o`.`id` AS `id`,`o`.`po_number` AS `po_number`,`o`.`order_date` AS `order_date`,`o`.`pickup_date` AS `pickup_date`,concat(concat(concat(concat(`c`.`first_name`,' '),`c`.`middle_name`),' '),`c`.`last_name`) AS `customer`,sum((`od`.`quantity` * `od`.`unit_price`)) AS `total_amount`,(select `os`.`name` from (`order_order_status` `oos` join `order_status` `os` on((`oos`.`status_id` = `os`.`id`))) where (`oos`.`order_id` = `o`.`id`) order by `oos`.`created_at` desc limit 1) AS `status` from ((`orders` `o` join `customers` `c` on((`o`.`customer_id` = `c`.`id`))) join `order_details` `od` on((`o`.`id` = `od`.`order_id`))) group by `o`.`po_number`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `orders_vw` AS select `o`.`id` AS `id`,`u`.`id` AS `user_id`,`o`.`po_number` AS `po_number`,`o`.`order_date` AS `order_date`,`o`.`pickup_date` AS `pickup_date`,concat(concat(concat(concat(`c`.`first_name`,' '),`c`.`middle_name`),' '),`c`.`last_name`) AS `customer`,sum((`od`.`quantity` * `od`.`unit_price`)) AS `total_amount`,(select `os`.`name` from (`order_order_status` `oos` join `order_status` `os` on((`oos`.`status_id` = `os`.`id`))) where (`oos`.`order_id` = `o`.`id`) order by `oos`.`created_at` desc limit 1) AS `status` from (((`orders` `o` join `customers` `c` on((`o`.`customer_id` = `c`.`id`))) join `order_details` `od` on((`o`.`id` = `od`.`order_id`))) join `users` `u` on((`c`.`id` = `u`.`customer_id`))) group by `o`.`po_number`;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `order_details_vw`
+--
+DROP TABLE IF EXISTS `order_details_vw`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `order_details_vw` AS select `od`.`order_id` AS `order_id`,`p`.`name` AS `product`,`pc`.`name` AS `category`,`p`.`uom` AS `uom`,`od`.`unit_price` AS `unit_price`,`od`.`quantity` AS `quantity`,(`od`.`quantity` * `od`.`unit_price`) AS `price` from ((`products` `p` join `product_category` `pc` on((`p`.`category_id` = `pc`.`id`))) join `order_details` `od` on((`od`.`product_id` = `p`.`id`)));
 
 --
 -- Indexes for dumped tables
@@ -2778,7 +2848,7 @@ ALTER TABLE `roles`
 -- Indexes for table `settings`
 --
 ALTER TABLE `settings`
-  ADD PRIMARY KEY (`s_key`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `users`
@@ -2809,17 +2879,17 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `customer_credits`
 --
 ALTER TABLE `customer_credits`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=14;
 --
 -- AUTO_INCREMENT for table `order_status`
 --
@@ -2844,7 +2914,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `zipcodes`
 --

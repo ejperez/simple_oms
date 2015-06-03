@@ -70,9 +70,6 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
     // create order form
     Route::get('orders/create', 'OrdersController@create');
 
-    // show order as readonly
-    Route::get('orders/{order}', 'OrdersController@show');
-
     // create order
     Route::post('orders','OrdersController@store');
 
@@ -81,6 +78,9 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
 
     // update order
     Route::put('orders/{order}', 'OrdersController@update');
+
+    // update order status
+    Route::put('orders/{order}/update-status/{status}', 'OrdersController@updateStatus');
 
     /** CUSTOMERS **/
 

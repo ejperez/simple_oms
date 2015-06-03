@@ -4,6 +4,7 @@ use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
 use SimpleOMS\Order_Detail;
 use SimpleOMS\Order_Status;
+use SimpleOMS\Setting;
 use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
 use Datatables;
@@ -21,7 +22,13 @@ class OrdersController extends Controller {
 	 */
 	public function index()
 	{
-		return view('orders.index');
+        // Settings
+        $CS = Setting::getValue('PESO_SYMBOL');
+
+        // User role
+        $role = Auth::user()->role->name;
+
+		return view('orders.index', compact('CS', 'role'));
 	}
 
     /**
@@ -37,7 +44,17 @@ class OrdersController extends Controller {
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
 
-        return view('orders.create', compact('errors', 'categories'));
+        // Get remaining credit
+        $credit = Auth::user()->customer->credit->credit_remaining;
+
+        // Settings
+        $CS = Setting::getValue('PESO_SYMBOL');
+        $DF = Setting::getValue('DATE_FORMAT');
+        $DF_PHP = Setting::getValue('DATE_FORMAT_PHP');
+        $PDC = Setting::getValue('PICKUP_DAYS_COUNT');
+        $MQ = Setting::getValue('MAX_QUANTITY');
+
+        return view('orders.create', compact('errors', 'categories', 'CS', 'DF', 'DF_PHP', 'PDC', 'MQ', 'credit'));
     }
 
     /***
@@ -98,17 +115,6 @@ class OrdersController extends Controller {
         }
     }
 
-    public function show(Order $order)
-    {
-        // Fetch form validation errors
-        $errors = Session::get('errors');
-
-        // Get categories
-        $categories = Product_Category::orderBy('name')->get();
-
-        return view('orders.create', compact('errors', 'categories'));
-    }
-
     /***
      * Load edit order page
      * @param $order
@@ -140,46 +146,90 @@ class OrdersController extends Controller {
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
 
-        return view('orders.edit', compact('order', 'product_details', 'errors', 'categories', 'items'));
+        // Settings
+        $CS = Setting::getValue('PESO_SYMBOL');
+        $DF = Setting::getValue('DATE_FORMAT');
+        $DF_PHP = Setting::getValue('DATE_FORMAT_PHP');
+        $PDC = Setting::getValue('PICKUP_DAYS_COUNT');
+        $MQ = Setting::getValue('MAX_QUANTITY');
+
+        // Get remaining credit
+        $credit = Auth::user()->customer->credit->credit_remaining;
+
+        return view('orders.edit', compact('order', 'errors', 'categories', 'items', 'credit', 'CS', 'DF', 'DF_PHP', 'PDC', 'MQ'));
     }
 
     /***
+     * Update order and details
      * @param Requests\StoreOrderRequest $request
      * @param Order $order
      * @return string|\Symfony\Component\HttpFoundation\Response
      */
     public function update(Requests\StoreOrderRequest $request, Order $order)
     {
-        // Check if there is selected items
-        if (count(Input::get('items')) == 0){
-            return response()->json(['responseJSON' => 'Shopping cart is empty.'], 422);
+        $products = Input::get('product');
+        $quantities = Input::get('quantity');
+        $unit_prices = Input::get('unit_price');
+
+        if ($this->computeTotalAmount($products, $quantities, $unit_prices) == 0)
+        {
+            Session::flash('error_message', 'Total amount is zero.');
+            return Redirect::back()->withInput(Input::all());
         }
+        else
+        {
+            $order->po_number    = Input::get('po_number');
+            $order->order_date   = Input::get('order_date');
+            $order->pickup_date  = Input::get('pickup_date');
+            $order->updated_by   = Auth::user()->id;
+            $order->update();
 
-        // Check if user entered quantities
-        if (floatval(Input::get('total_amount')) == 0){
-            return response()->json(['responseJSON' => 'Total amount is zero. Enter order quantity.'], 422);
+            // Delete related order details
+            Order_Detail::where('order_id', '=', $order->id)->delete();
+
+            // Save order details
+            foreach ($products as $key=>$product) {
+                $order_details = new Order_Detail();
+                $order_details->order_id = $order->id;
+                $order_details->product_id = $product;
+                $order_details->quantity = $quantities[$key];
+                $order_details->unit_price = $unit_prices[$key];
+                $order_details->save();
+            }
+
+            // Redirect to update order form
+            Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was updated.');
+            return redirect('orders/'.$order->id.'/edit');
         }
+    }
 
-        // Update order details
-        $order->po_number    = Input::get('po_number');
-        $order->updated_by   = Auth::user()->id;
-        $order->order_date   = Input::get('order_date');
-        $order->pickup_date  = Input::get('pickup_date');
-        $order->total_amount = Input::get('total_amount');
-        $order->update();
-
-        // Delete related order details
-        Order_Detail::where('order_id', '=', $order->id)->delete();
-
-        // Save order details
-        foreach (Input::get('items') as $item) {
-            $order_details = new Order_Detail();
-            $order_details->order_id = $order->id;
-            $order_details->product_id = $item['id'];
-            $order_details->quantity = $item['quantity'];
-            $order_details->save();
+    /***
+     * Compute total amount of items
+     * @param $products
+     * @param $quantities
+     * @param $unit_prices
+     * @return int
+     */
+    private function computeTotalAmount(array $products, array $quantities, array $unit_prices)
+    {
+        $total = 0;
+        foreach ($products as $key=>$product){
+            $total += $quantities[$key] * $unit_prices[$key];
         }
+        return $total;
+    }
 
-        return json_encode(['status' => 'success']);
+    public function updateStatus(Order $order, $status)
+    {
+        // Save status
+        Order_Order_Status::create([
+            'order_id' => $order->id,
+            'status_id' => Order_Status::where('name', 'like', $status)->first()->id,
+            'user_id' => Auth::user()->id
+        ]);
+
+        // Redirect to list of orders
+        Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was '.strtolower($status).'.');
+        return redirect('orders');
     }
 }

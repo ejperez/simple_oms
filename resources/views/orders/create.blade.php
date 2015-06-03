@@ -72,77 +72,46 @@
                         <th>DESCRIPTION</th>
                         <th>CATEGORY</th>
                         <th>U/M</th>
-                        <th>UNIT PRICE ({{ Session::get('PESO_SYMBOL') }})</th>
+                        <th>UNIT PRICE ({{ $CS }})</th>
                         <th>QUANTITY</th>
-                        <th>PRICE ({{ Session::get('PESO_SYMBOL') }})</th>
+                        <th>PRICE ({{ $CS }})</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
 
                 <div id="div_total_amount" class="panel panel-info">
-                    <div class="panel-heading text-right">
-                        <label for="">Total: {{ Session::get('PESO_SYMBOL') }}</label>
-                        <label for="" id="lbl_total_amount">0.00</label>
+                    <div class="panel-heading">
+                        <table>
+                            <tr>
+                                <td width="80%"><label for="">Current Credits: {{ $CS }}</label></td>
+                                <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Total: {{ $CS }}</label></td>
+                                <td><label for="" id="lbl_total_amount"></label></td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Remaining Credits: {{ $CS }}</label></td>
+                                <td><label for="" id="lbl_rem_credits"></label></td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </fieldset>
         </div>
     </div>
 
-
-
-
-
-        <div class="row">
-            <div class="col-md-12 text-right">
-                <input class="btn btn-primary" type="submit"/>
-            </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <input class="btn btn-primary" type="submit"/>
         </div>
+    </div>
 
     <input type="hidden" name="cart_table_data" id="cart_table_data" value="{{ Form::old('cart_table_data') }}"/>
     {!! Form::close() !!}
 </div>
-
-    @section('css')
-    <style>
-        table.dataTable tr{
-            cursor: pointer;
-        }
-        fieldset{
-            margin-top:2em;
-        }
-        div#div_total_amount label{
-            font-size:1.5em;
-            font-weight:bold;
-        }
-    </style>
-    @endsection('css')
-
     @section('js')
-    <script id="options-template"  type="text/x-handlebars-template">
-        @{{#each products }}
-        <option value="@{{ id }}">@{{ name }}</option>
-        @{{/each }}
-    </script>
-
-    <script id="cart-row-template"  type="text/x-handlebars-template">
-        @{{#each items }}
-        <tr id="@{{ id }}" class="@{{#oddEven @index}}@{{/oddEven}}">
-            <td>@{{ name }}</td>
-            <td>@{{ category }}</td>
-            <td>@{{ uom }}</td>
-            <td>@{{ unit_price }}</td>
-            <td>
-                <input data-unit-price="@{{ unit_price }}" type="number" name="quantity[]" class="quantity" value="@{{ quantity }}"/>
-                <input type="hidden" name="product[]" value="@{{ id }}"/>
-                <input type="hidden" name="unit_price[]" value="@{{ unit_price }}"/>
-            </td>
-            <td class="price">0.00</td>
-        </tr>
-        @{{/each }}
-    </script>
-        
     <script>
         // Handlebars templates
         var options_template = Handlebars.compile($("#options-template").html()),
@@ -151,6 +120,10 @@
         var dt_cart = null,
                 products_data = {},
                 cart_data = {},
+
+                total = 0,
+                curr_credit = {{ $credit }},
+                rem_credit = 0,
 
                 // jQuery selectors
                 $order_date = $('input#order_date'),
@@ -165,6 +138,8 @@
                 $btn_remove_product = $('a#btn_remove_product'),
 
                 $lbl_total_amount = $('label#lbl_total_amount'),
+                $lbl_curr_credits = $('label#lbl_curr_credits'),
+                $lbl_rem_credits = $('label#lbl_rem_credits'),
 
                 $create_order_form = $('form#create_order_form');
 
@@ -173,11 +148,11 @@
             $order_date.datepicker({
                 startDate:              "0d",
                 disableTouchKeyboard:   true,
-                format:                 '{{ Session::get('DATE_FORMAT') }}'
+                format:                 '{{ $DF }}'
             }).on('change', function(){
                 var pickup_date = new Date($(this).val());
-                pickup_date = pickup_date.addDays({{ Session::get('PICKUP_DAYS_COUNT') }});
-                $pickup_date.val(pickup_date.format('{{ Session::get('DATE_FORMAT_PHP') }}'));
+                pickup_date = pickup_date.addDays({{ $PDC }});
+                $pickup_date.val(pickup_date.format('{{ $DF_PHP }}'));
             });
 
             // Initialize products select
@@ -247,7 +222,16 @@
                 // Parse value to integer
                 var value = $(this).val();
                 value = isNaN(parseInt(value)) ? 0 : parseInt(value);
+
+                // Maintain max value
+                if (value > {{ $MQ }}){
+                    value = {{ $MQ }};
+                }
+
                 $(this).val(value);
+
+                // Update quantity in cart data
+                cart_data[$(this).attr('data-id')].quantity = value;
 
                 computeAndDisplayTotal();
             });
@@ -273,15 +257,22 @@
             });
 
             // Store cart data to hidden field
-            $create_order_form.submit(function(){
+            $create_order_form.submit(function(e){
+                // Prevent submit if remaining credit is zero
+                if (rem_credit < 0){
+                    alert('Cannot continue when remaining credits is equal or less than zero');
+                    e.preventDefault();
+                }
+
                 $('input#cart_table_data').val(JSON.stringify(cart_data));
             });
 
             @if (Form::old('cart_table_data'))
             cart_data = {!! Form::old('cart_table_data') !!};
             drawCartTable();
-            computeAndDisplayTotal();
             @endif
+
+            computeAndDisplayTotal();
         });
 
         // Display cart items to table
@@ -296,11 +287,11 @@
             $tbl_cart.find('tbody').html(cart_row_template({items: items}));
         }
 
-        function computeAndDisplayTotal(){
-            var total = 0;
-
+        function computeAndDisplayTotal()
+        {
+            total = 0;
             // Compute subtotal for each row of cart table
-            $tbl_cart.children('tbody').children('tr').each(function(){
+            $tbl_cart.children('tbody').children('tr[id]').each(function(){
                 var $quantity = $(this).find('input.quantity:first'),
                         $price = $(this).find('td.price:first'),
                         quantity = parseInt($quantity.val()),
@@ -313,7 +304,18 @@
                 $price.html(price.toFixed(2));
             });
 
+            // Compute remaining credits
+            rem_credit = curr_credit - total;
+
+            if (rem_credit < 0){
+                $lbl_rem_credits.css('color', 'red');
+            } else {
+                $lbl_rem_credits.removeAttr('style');
+            }
+
             $lbl_total_amount.html(total.toFixed(2));
+            $lbl_curr_credits.html(curr_credit.toFixed(2));
+            $lbl_rem_credits.html(rem_credit.toFixed(2));
         }
     </script>
     @endsection('js')

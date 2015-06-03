@@ -24,12 +24,6 @@ class AuthLoginEventHandler {
 	 */
 	public function handle(\SimpleOMS\User $user, $remember)
 	{
-		// Get settings from database and store to session
-        $settings = \SimpleOMS\Setting::all();
-
-        foreach ($settings as $setting){
-            Session::set($setting->s_key, $setting->s_value);
-        }
 	}
 
 }

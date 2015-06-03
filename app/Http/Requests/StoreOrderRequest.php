@@ -45,9 +45,10 @@ class StoreOrderRequest extends Request {
                 return [
                     'po_number'     => 'required|alpha_num|max:50|unique:orders,po_number,'.$order->id,
                     'order_date'    => 'required|date',
-                    'pickup_date'   => 'required|date',
-                    'items'         => 'array',
-                    'total_amount'  => 'required|numeric'
+                    'pickup_date'   => 'required|date|after:order_date',
+                    'product'       => 'array',
+                    'quantity'      => 'array',
+                    'unit_price'    => 'array'
                 ];
             }
             default:break;

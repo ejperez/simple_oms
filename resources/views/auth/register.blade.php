@@ -1,65 +1,72 @@
 @extends('app')
 
 @section('content')
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-8 col-md-offset-2">
-			<div class="panel panel-default">
-				<div class="panel-heading">Register</div>
-				<div class="panel-body">
-					@if (count($errors) > 0)
-						<div class="alert alert-danger">
-							<strong>Whoops!</strong> There were some problems with your input.<br><br>
-							<ul>
-								@foreach ($errors->all() as $error)
-									<li>{{ $error }}</li>
-								@endforeach
-							</ul>
-						</div>
-					@endif
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Register User</h3>
+        </div>
+    </div>
 
-					<form class="form-horizontal" role="form" method="POST" action="{{ url('/auth/register') }}">
-						<input type="hidden" name="_token" value="{{ csrf_token() }}">
+    @include('alerts')
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Name</label>
-							<div class="col-md-6">
-								<input type="text" class="form-control" name="name" value="{{ old('name') }}">
-							</div>
-						</div>
+    <form class="form" role="form" method="POST" action="{{ url('/auth/register') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="required">First Name</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ old('first_name') }}" required>
+                        </div>
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">E-Mail Address</label>
-							<div class="col-md-6">
-								<input type="email" class="form-control" name="email" value="{{ old('email') }}">
-							</div>
-						</div>
+                        <div class="col-md-12">
+                            <label>Middle Name</label>
+                            <input type="text" class="form-control" name="middle_name" value="{{ old('middle_name') }}">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ old('last_name') }}" required>
+                        </div>
+                    </div>
+                </div>
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Password</label>
-							<div class="col-md-6">
-								<input type="password" class="form-control" name="password">
-							</div>
-						</div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="required">User Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">E-Mail Address</label>
+                            <input type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">Confirm Password</label>
+                            <input type="password" class="form-control" name="password_confirmation" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">Role</label><br/>
+                            @foreach ($roles as $role)
+                                <label>
+                                    <input {{ old('role_id') == $role->id ? 'checked="checked"' : '' }} type="radio" name="role_id" value="{{ $role->id }}"/>
+                                    {{ $role->name }}
+                                </label>&nbsp;&nbsp;&nbsp;
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-						<div class="form-group">
-							<label class="col-md-4 control-label">Confirm Password</label>
-							<div class="col-md-6">
-								<input type="password" class="form-control" name="password_confirmation">
-							</div>
-						</div>
-
-						<div class="form-group">
-							<div class="col-md-6 col-md-offset-4">
-								<button type="submit" class="btn btn-primary">
-									Register
-								</button>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <input class="btn btn-primary" type="submit" value="Register"/>
+                </div>
+            </div>
+    </form>
 </div>
 @endsection
