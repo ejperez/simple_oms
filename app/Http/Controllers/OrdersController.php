@@ -66,21 +66,11 @@ class OrdersController extends Controller {
     {
         // Compute total amount
         // Order with total amount of zero must not proceed
-        $total = 0;
         $products = Input::get('product');
         $quantities = Input::get('quantity');
         $unit_prices = Input::get('unit_price');
 
-        if (empty($products)){
-            Session::flash('error_message', 'There are no ordered items.');
-            return Redirect::back()->withInput(Input::all());
-        }
-
-        foreach ($products as $key=>$product){
-            $total += $quantities[$key] * $unit_prices[$key];
-        }
-
-        if ($total == 0){
+        if ($this->computeTotalAmount($products, $quantities, $unit_prices) == 0){
             Session::flash('error_message', 'Total amount is zero.');
             return Redirect::back()->withInput(Input::all());
         } else {
@@ -210,13 +200,17 @@ class OrdersController extends Controller {
      * @param $unit_prices
      * @return int
      */
-    private function computeTotalAmount(array $products, array $quantities, array $unit_prices)
+    private function computeTotalAmount($products, $quantities, $unit_prices)
     {
-        $total = 0;
-        foreach ($products as $key=>$product){
-            $total += $quantities[$key] * $unit_prices[$key];
+        if (is_array($products)){
+            $total = 0;
+            foreach ($products as $key=>$product){
+                $total += $quantities[$key] * $unit_prices[$key];
+            }
+            return $total;
+        } else {
+            return 0;
         }
-        return $total;
     }
 
     public function updateStatus(Order $order, $status)

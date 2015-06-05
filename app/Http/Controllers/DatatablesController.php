@@ -14,11 +14,11 @@ class DatatablesController extends Controller {
      */
     public function getOrders()
     {
-        // Approvers can view orders from all customers, but only with 'Pending' status
+        // Approvers can view orders from all customers
         // Administrators and Sales can only view their orders
 
         if (Auth::user()->hasRole(['approver'])){
-            $orders = DB::table('orders_vw')->where('status', '=', 'Pending')->get();
+            $orders = DB::table('orders_vw')->get();
         } else {
             $orders = DB::table('orders_vw')->where('user_id', '=', Auth::user()->id)->get();
         }

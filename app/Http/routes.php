@@ -17,6 +17,9 @@ Route::controllers([
     'password' => 'Auth\PasswordController',
 ]);
 
+/*
+ * Any authorized user
+ */
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 'sales', 'approver']], function () {
 
     // home
@@ -80,7 +83,9 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
     Route::put('orders/{order}', 'OrdersController@update');
 
     // update order status
-    Route::put('orders/{order}/update-status/{status}', 'OrdersController@updateStatus');
+    // only cancelled state is allowed
+    Route::put('orders/{order}/update-customer-status/{status}', 'OrdersController@updateStatus')
+        ->where('status', 'Cancelled');
 
     /** CUSTOMERS **/
 
@@ -95,5 +100,8 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
  * Approver only
  */
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['approver']], function(){
-
+    // update order status
+    // only approved and disapproved state are allowed
+    Route::put('orders/{order}/update-approver-status/{status}', 'OrdersController@updateStatus')
+        ->where('status', 'Approved|Disapproved');
 });

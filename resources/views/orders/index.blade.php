@@ -68,7 +68,7 @@
         </table>
     </script>
 
-    <script id="options-template"  type="text/x-handlebars-template">
+    <script id="order-options-template"  type="text/x-handlebars-template">
         @{{#hasClass class 'Pending'}}
 
         @if ($role == 'Approver')
@@ -84,7 +84,7 @@
     </script>
 
     <script>
-        var options = Handlebars.compile($("#options-template").html()),
+        var options = Handlebars.compile($("#order-options-template").html()),
                 template = Handlebars.compile($("#details-template").html());
 
         var $tbl_history = $('#tbl_history'),
@@ -124,6 +124,13 @@
                 order: [[2, 'desc']]
             });
 
+            // Disable automatic searching every keypress, wait for ENTER key instead
+            $('#tbl_history_filter input').unbind().bind('keyup', function(e) {
+                if(e.keyCode == 13) {
+                    dt_history.search(this.value).draw();
+                }
+            });
+
             // Add option buttons
             dt_history.on( 'draw.dt', function () {
                 // Add options
@@ -160,7 +167,7 @@
             // Update status buttons click event
             $tbl_history.on('click', 'a.btn-approve, a.btn-disapprove, a.btn-cancel', function(){
                 // Update url of hidden form
-                var url = '{{ url('orders')  }}/' + $(this).attr('data-order-id') + '/update-status/' + $(this).attr('data-status');
+                var url = '{{ url('orders')  }}/' + $(this).attr('data-order-id') + '/update-{{ Auth::user()->hasRole('approver') ? 'approver' : 'customer' }}-status/' + $(this).attr('data-status');
                 $update_order_status_form.attr('action', url).submit();
             });
         });
