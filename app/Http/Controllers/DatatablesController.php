@@ -2,7 +2,9 @@
 
 use SimpleOMS\Http\Requests;
 use Illuminate\Support\Collection;
+use Hashids\Hashids;
 use Datatables;
+use Config;
 use Auth;
 use DB;
 
@@ -23,11 +25,13 @@ class DatatablesController extends Controller {
             $orders = DB::table('orders_vw')->where('user_id', '=', Auth::user()->id)->get();
         }
 
+        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+
         $order_collection = new Collection();
 
         foreach ($orders as $order){
             $order_collection->push([
-                'id' => $order->id,
+                'id' => $hashids->encode($order->id),
                 'po_number' => $order->po_number,
                 'order_date' => $order->order_date,
                 'pickup_date' => $order->pickup_date,

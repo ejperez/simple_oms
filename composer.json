@@ -9,7 +9,8 @@
 		"barryvdh/laravel-ide-helper": "^2.0",
 		"illuminate/html": "^5.0",
 		"yajra/laravel-datatables-oracle": "~5.0",
-        "doctrine/dbal": "v2.4.2"
+        "doctrine/dbal": "v2.4.2",
+        "vinkla/hashids": "^1.1"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",

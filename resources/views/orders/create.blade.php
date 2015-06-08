@@ -2,15 +2,12 @@
 
 @section('content')
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Create Order</h3>
-        </div>
-    </div>
-
-    @include('alerts')
-
-    {!! Form::open(['url' => url('orders'), 'name' => 'create_order_form', 'id' => 'create_order_form']) !!}
+    @if (isset($order))
+        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id, 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
+        {!! Form::hidden('hash', $order->id) !!}
+    @else
+        {!! Form::open(['url' => url('orders'), 'name' => 'order_form', 'id' => 'order_form']) !!}
+    @endif
     <div class="row">
         <div class="col-md-3">
             <fieldset>
@@ -19,18 +16,20 @@
                 <div class="row">
                     <div class="col-md-12">
                         <label for="po_number" class="required">PO Number</label>
-                        <input class="form-control" maxlength="50" type="text" name="po_number" id="po_number" value="{{ Form::old('po_number') }}" required/>
+                        {!! Form::text('po_number', Input::old('po_number'), [ 'id' => "po_number", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
                     </div>
                     <div class="col-md-12">
                         <label for="order_date" class="required">Order Date</label>
                         <div class="input-group date">
-                            <input class="form-control" maxlength="10" type="text" name="order_date" id="order_date" value="{{ Form::old('order_date') }}" required/><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                            {!! Form::text('order_date', Input::old('order_date'), [ 'id' => "order_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required" ]) !!}
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                         </div>
                     </div>
                     <div class="col-md-12">
                         <label for="pickup_date" class="required">Pickup Date</label>
                         <div class="input-group date">
-                            <input class="form-control" maxlength="10" type="text" name="pickup_date" id="pickup_date" value="{{ Form::old('pickup_date') }}" required readonly/><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                            {!! Form::text('pickup_date', Input::old('pickup_date'), [ 'id' => "pickup_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required", 'readonly' => "readonly" ]) !!}
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                         </div>
                     </div>
                     <div class="col-md-3">&nbsp;</div>
@@ -72,9 +71,9 @@
                         <th>DESCRIPTION</th>
                         <th>CATEGORY</th>
                         <th>U/M</th>
-                        <th>UNIT PRICE ({{ $CS }})</th>
+                        <th>UNIT PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
                         <th>QUANTITY</th>
-                        <th>PRICE ({{ $CS }})</th>
+                        <th>PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -84,15 +83,15 @@
                     <div class="panel-heading">
                         <table>
                             <tr>
-                                <td width="80%"><label for="">Current Credits: {{ $CS }}</label></td>
+                                <td width="80%"><label for="">Current Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
                                 <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
                             </tr>
                             <tr>
-                                <td><label for="">Total: {{ $CS }}</label></td>
+                                <td><label for="">Total: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
                                 <td><label for="" id="lbl_total_amount"></label></td>
                             </tr>
                             <tr>
-                                <td><label for="">Remaining Credits: {{ $CS }}</label></td>
+                                <td><label for="">Remaining Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
                                 <td><label for="" id="lbl_rem_credits"></label></td>
                             </tr>
                         </table>
@@ -111,6 +110,30 @@
     <input type="hidden" name="cart_table_data" id="cart_table_data" value="{{ Form::old('cart_table_data') }}"/>
     {!! Form::close() !!}
 </div>
+
+<script id="options-template"  type="text/x-handlebars-template">
+    @{{#each products }}
+    <option value="@{{ id }}">@{{ name }}</option>
+    @{{/each }}
+</script>
+
+<script id="cart-row-template"  type="text/x-handlebars-template">
+    @{{#each items }}
+    <tr id="@{{ id }}" class="@{{#oddEven @index}}@{{/oddEven}}">
+        <td>@{{ name }}</td>
+        <td>@{{ category }}</td>
+        <td>@{{ uom }}</td>
+        <td>@{{ unit_price }}</td>
+        <td>
+            <input data-unit-price="@{{ unit_price }}" data-id="@{{ id }}" type="number" name="quantity[]" class="quantity" value="@{{ quantity }}"/>
+            <input type="hidden" name="product[]" value="@{{ id }}"/>
+            <input type="hidden" name="unit_price[]" value="@{{ unit_price }}"/>
+        </td>
+        <td class="price">0.00</td>
+    </tr>
+    @{{/each }}
+</script>
+
     @section('js')
     <script>
         // Handlebars templates
@@ -141,18 +164,18 @@
                 $lbl_curr_credits = $('label#lbl_curr_credits'),
                 $lbl_rem_credits = $('label#lbl_rem_credits'),
 
-                $create_order_form = $('form#create_order_form');
+                $order_form = $('form#order_form');
 
         $(document).ready(function(){
             // Initialize datepicker, set minimum date to today
             $order_date.datepicker({
                 startDate:              "0d",
                 disableTouchKeyboard:   true,
-                format:                 '{{ $DF }}'
+                format:                 '{{ Config::get('constants.DATE_FORMAT') }}'
             }).on('change', function(){
                 var pickup_date = new Date($(this).val());
-                pickup_date = pickup_date.addDays({{ $PDC }});
-                $pickup_date.val(pickup_date.format('{{ $DF_PHP }}'));
+                pickup_date = pickup_date.addDays({{ Config::get('constants.PICKUP_DAYS_COUNT') }});
+                $pickup_date.val(pickup_date.format('{{ Config::get('constants.DATE_FORMAT_PHP') }}'));
             });
 
             // Initialize products select
@@ -224,10 +247,16 @@
                 value = isNaN(parseInt(value)) ? 0 : parseInt(value);
 
                 // Maintain max value
-                if (value > {{ $MQ }}){
-                    value = {{ $MQ }};
+                if (value > {{ Config::get('constants.MAX_QUANTITY') }}){
+                    value = {{ Config::get('constants.MAX_QUANTITY') }};
                 }
 
+                // Minimum quantity must be zero
+                if (value < 0){
+                    value = 0;
+                }
+
+                // Update value
                 $(this).val(value);
 
                 // Update quantity in cart data
@@ -257,7 +286,7 @@
             });
 
             // Store cart data to hidden field
-            $create_order_form.submit(function(e){
+            $order_form.submit(function(e){
                 // Prevent submit if remaining credit is zero
                 if (rem_credit < 0){
                     alert('Cannot continue when remaining credits is equal or less than zero');
@@ -269,9 +298,11 @@
 
             @if (Form::old('cart_table_data'))
             cart_data = {!! Form::old('cart_table_data') !!};
-            drawCartTable();
+            @elseif (isset($items) && is_array($items))
+            cart_data = {!! json_encode($items) !!};
             @endif
 
+            drawCartTable();
             computeAndDisplayTotal();
         });
 

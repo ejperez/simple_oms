@@ -4,14 +4,6 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h3>List of Orders</h3>
-        </div>
-    </div>
-
-    @include('alerts')
-
-    <div class="row">
-        <div class="col-md-12">
             <table id="tbl_history" class="table display" cellspacing="0">
                 <thead>
                 <tr>
@@ -20,7 +12,7 @@
                     <th>Order Date</th>
                     <th>Pickup Date</th>
                     <th>Customer</th>
-                    <th>Total Amount ({{ $CS }})</th>
+                    <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
                     <th>Status</th>
                     <th width="100">Options</th>
                 </tr>
@@ -32,14 +24,6 @@
 </div>
 
 {!! Form::open(['url' => '', 'name' => 'update_order_status_form', 'id' => 'update_order_status_form', 'method' => 'PUT']) !!}{!! Form::close() !!}
-@section('css')
-    <style>
-        table.dataTable tr
-        {
-            cursor: pointer;
-        }
-    </style>
-@endsection('css')
 
 @section('js')
     <script id="details-template" type="text/x-handlebars-template">
@@ -49,9 +33,9 @@
             <th>Product</th>
             <th>Category</th>
             <th>UOM</th>
-            <th>Unit Price ({{ $CS }})</th>
+            <th>Unit Price ({{ Config::get('constants.PESO_SYMBOL') }})</th>
             <th>Quantity</th>
-            <th>Price ({{ $CS }})</th>
+            <th>Price ({{ Config::get('constants.PESO_SYMBOL') }})</th>
             </thead>
             <tbody>
             @{{#each details}}

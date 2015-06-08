@@ -1,7 +1,10 @@
 <?php namespace SimpleOMS\Providers;
 
+use Config;
+use Hashids\Hashids;
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RouteServiceProvider extends ServiceProvider {
 
@@ -25,8 +28,19 @@ class RouteServiceProvider extends ServiceProvider {
 		parent::boot($router);
 
         // Model bindings
-        $router->model('order', 'SimpleOMS\Order');
-        $router->model('category', 'SimpleOMS\Product_Category');
+        $router->bind('order', function($value)
+        {
+            $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+            return \SimpleOMS\Order::where('id', $hashids->decode($value))->first();
+        });
+
+        $router->bind('category', function($value)
+        {
+            $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+            return \SimpleOMS\Product_Category::where('id', $hashids->decode($value))->first();
+        });
+
+        //$router->model('category', 'SimpleOMS\Product_Category');
 	}
 
 	/**

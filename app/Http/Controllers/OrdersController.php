@@ -4,10 +4,11 @@ use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
 use SimpleOMS\Order_Detail;
 use SimpleOMS\Order_Status;
-use SimpleOMS\Setting;
 use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
+use Hashids\Hashids;
 use Datatables;
+use Config;
 use Redirect;
 use Session;
 use Input;
@@ -22,13 +23,12 @@ class OrdersController extends Controller {
 	 */
 	public function index()
 	{
-        // Settings
-        $CS = Setting::getValue('PESO_SYMBOL');
-
-        // User role
+        // Get roles
         $role = Auth::user()->role->name;
 
-		return view('orders.index', compact('CS', 'role'));
+        $title = 'List of Orders';
+
+		return view('orders.index', compact('role', 'title'));
 	}
 
     /**
@@ -44,17 +44,18 @@ class OrdersController extends Controller {
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
 
+        // Hash categories
+        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+        foreach ($categories as $key => $category){
+            $category->id = $hashids->encode($category->id);
+        }
+
         // Get remaining credit
         $credit = Auth::user()->customer->credit->credit_remaining;
 
-        // Settings
-        $CS = Setting::getValue('PESO_SYMBOL');
-        $DF = Setting::getValue('DATE_FORMAT');
-        $DF_PHP = Setting::getValue('DATE_FORMAT_PHP');
-        $PDC = Setting::getValue('PICKUP_DAYS_COUNT');
-        $MQ = Setting::getValue('MAX_QUANTITY');
+        $title = 'Create Order';
 
-        return view('orders.create', compact('errors', 'categories', 'CS', 'DF', 'DF_PHP', 'PDC', 'MQ', 'credit'));
+        return view('orders.create', compact('errors', 'categories', 'credit', 'title'));
     }
 
     /***
@@ -136,17 +137,22 @@ class OrdersController extends Controller {
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
 
-        // Settings
-        $CS = Setting::getValue('PESO_SYMBOL');
-        $DF = Setting::getValue('DATE_FORMAT');
-        $DF_PHP = Setting::getValue('DATE_FORMAT_PHP');
-        $PDC = Setting::getValue('PICKUP_DAYS_COUNT');
-        $MQ = Setting::getValue('MAX_QUANTITY');
+        // Hash categories
+        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+        foreach ($categories as $key => $category){
+            $category->id = $hashids->encode($category->id);
+        }
 
         // Get remaining credit
         $credit = Auth::user()->customer->credit->credit_remaining;
 
-        return view('orders.edit', compact('order', 'errors', 'categories', 'items', 'credit', 'CS', 'DF', 'DF_PHP', 'PDC', 'MQ'));
+        // Hash id
+        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+        $order->id = $hashids->encode($order->id);
+
+        $title = 'Edit Order';
+
+        return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'title'));
     }
 
     /***
@@ -189,7 +195,7 @@ class OrdersController extends Controller {
 
             // Redirect to update order form
             Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was updated.');
-            return redirect('orders/'.$order->id.'/edit');
+            return redirect('orders/'.Input::get('hash').'/edit');
         }
     }
 

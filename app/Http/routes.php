@@ -28,26 +28,12 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
     // order history
     Route::get('orders', 'OrdersController@index');
 
-    // AJAX requests
+    // Datatables content requests
     Route::get('get-orders-datatable', 'DatatablesController@getOrders');
-    Route::get('search-address', function() {
-        $term = Input::get('term');
-        if(!empty($term)){
-            $term = '%'.$term.'%'; // Enclose in wildcards
-            $zipcodes = \SimpleOMS\Zipcode::where('major_area', 'like', $term)
-                ->where('city', 'like', $term, 'OR')
-                ->where('zip_code', 'like', $term, 'OR')
-                ->get();
 
-            return json_encode($zipcodes);
-        } else {
-            abort(404);
-        }
-    });
-    Route::get('search-products-by-category/{category}', function($category) {
-        $category->products;
-        return json_encode($category);
-    });
+    // AJAX requests
+    Route::get('search-address', 'AJAXController@searchAddress');
+    Route::get('search-products-by-category/{category}', 'AJAXController@searchProductByCategory');
 });
 
 /*
@@ -64,7 +50,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator']], 
 });
 
 /*
- * Sales only
+ * Sales and Administrator only
  */
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administrator']], function(){
 

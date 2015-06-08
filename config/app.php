@@ -147,6 +147,7 @@ return [
 
         'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider', // Laravel IDE helper
         'yajra\Datatables\DatatablesServiceProvider',
+        'Vinkla\Hashids\HashidsServiceProvider',
 	],
 
 	/*
@@ -197,6 +198,7 @@ return [
         'Form'      => 'Illuminate\Html\FormFacade',
         'Html'      => 'Illuminate\Html\HtmlFacade',
         'Datatables'      => 'yajra\Datatables\Datatables',
+        'Hashids' => 'Vinkla\Hashids\Facades\Hashids',
 	],
 
 ];
