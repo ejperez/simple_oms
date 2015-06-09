@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 03, 2015 at 11:45 AM
+-- Generation Time: Jun 09, 2015 at 12:05 PM
 -- Server version: 5.6.21
 -- PHP Version: 5.6.3
 
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pickup_date` date DEFAULT NULL,
   `po_number` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `updated_by` int(10) unsigned DEFAULT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `orders`
@@ -182,23 +182,19 @@ INSERT INTO `orders` (`id`, `customer_id`, `order_date`, `created_at`, `updated_
 (10, 7, '2015-06-24', '2015-06-03 07:17:15', '2015-06-03 07:17:15', '2015-07-01', 'PAORDEROWAITER', NULL),
 (11, 7, '2015-07-04', '2015-06-03 07:17:49', '2015-06-03 07:17:49', '2015-07-11', 'PAORDERNIEDGAR', NULL),
 (12, 1, '2015-06-25', '2015-06-03 07:27:06', '2015-06-03 09:03:42', '2015-07-02', 'ADMINPO', 1),
-(13, 1, '2015-06-17', '2015-06-03 08:58:42', '2015-06-03 08:58:42', '2015-06-24', 'POKOTO', NULL);
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `orders_vw`
---
-CREATE TABLE IF NOT EXISTS `orders_vw` (
-`id` int(10) unsigned
-,`user_id` int(10) unsigned
-,`po_number` varchar(255)
-,`order_date` date
-,`pickup_date` date
-,`customer` text
-,`total_amount` decimal(41,2)
-,`status` varchar(255)
-);
+(13, 1, '2015-06-17', '2015-06-03 08:58:42', '2015-06-03 08:58:42', '2015-06-24', 'POKOTO', NULL),
+(14, 1, '2015-11-12', '2015-06-05 02:56:50', '2015-06-05 02:57:32', '2015-11-19', 'PONUMBER', 1),
+(15, 8, '2015-06-05', '2015-06-05 03:00:59', '2015-06-05 03:00:59', '2015-06-12', 'THISIS1234', NULL),
+(16, 8, '2015-08-21', '2015-06-05 03:01:23', '2015-06-05 03:01:23', '2015-08-28', 'THATPO4321', NULL),
+(17, 1, '2015-06-24', '2015-06-05 03:07:42', '2015-06-05 03:07:52', '2015-07-01', 'ORDERKOULET', 1),
+(18, 7, '2015-06-18', '2015-06-05 06:31:40', '2015-06-05 06:31:40', '2015-06-25', 'HUNGERGAMES', NULL),
+(19, 7, '2015-06-26', '2015-06-05 06:32:01', '2015-06-05 06:32:01', '2015-07-03', 'CANCELTHIS', NULL),
+(20, 1, '2015-06-18', '2015-06-08 06:52:00', '2015-06-08 06:52:00', '2015-06-25', 'POASDSD', NULL),
+(21, 1, '2015-06-26', '2015-06-08 07:26:23', '2015-06-08 09:37:25', '2015-07-03', 'THISISREUSED', 1),
+(22, 1, '2016-01-14', '2015-06-08 09:41:43', '2015-06-08 09:41:43', '2016-01-21', 'NEWWORLDORDER', NULL),
+(23, 1, '2015-06-18', '2015-06-08 09:51:43', '2015-06-08 09:51:43', '2015-06-25', 'COKEPAMORE', NULL),
+(24, 1, '2015-07-03', '2015-06-09 02:39:09', '2015-06-09 02:39:09', '2015-07-10', 'YOWYOW', NULL),
+(25, 8, '2015-07-02', '2015-06-09 09:05:42', '2015-06-09 09:05:42', '2015-07-09', 'SCARORDER', NULL);
 
 -- --------------------------------------------------------
 
@@ -242,23 +238,25 @@ INSERT INTO `order_details` (`order_id`, `product_id`, `quantity`, `created_at`,
 (11, 11, 20, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '20.00'),
 (11, 12, 30, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '30.00'),
 (11, 13, 40, '2015-06-03 07:17:49', '2015-06-03 07:17:49', '40.00'),
-(12, 8, 500, '2015-06-03 09:43:10', '2015-06-03 09:43:10', '26.00'),
-(13, 7, 500, '2015-06-03 08:58:42', '2015-06-03 08:58:42', '25.00');
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `order_details_vw`
---
-CREATE TABLE IF NOT EXISTS `order_details_vw` (
-`order_id` int(10) unsigned
-,`product` varchar(255)
-,`category` varchar(255)
-,`uom` varchar(255)
-,`unit_price` decimal(9,2) unsigned
-,`quantity` int(10) unsigned
-,`price` decimal(19,2) unsigned
-);
+(12, 8, 500, '2015-06-05 03:23:31', '2015-06-05 03:23:31', '26.00'),
+(13, 7, 500, '2015-06-03 08:58:42', '2015-06-03 08:58:42', '25.00'),
+(14, 3, 500, '2015-06-05 02:57:33', '2015-06-05 02:57:33', '20.00'),
+(15, 2, 100, '2015-06-05 03:00:59', '2015-06-05 03:00:59', '28.00'),
+(16, 10, 1, '2015-06-05 03:01:23', '2015-06-05 03:01:23', '10.00'),
+(16, 11, 2, '2015-06-05 03:01:23', '2015-06-05 03:01:23', '20.00'),
+(16, 12, 3, '2015-06-05 03:01:23', '2015-06-05 03:01:23', '30.00'),
+(17, 7, 50, '2015-06-05 03:07:52', '2015-06-05 03:07:52', '25.00'),
+(18, 10, 20, '2015-06-05 06:31:40', '2015-06-05 06:31:40', '10.00'),
+(18, 11, 40, '2015-06-05 06:31:40', '2015-06-05 06:31:40', '20.00'),
+(19, 3, 500, '2015-06-05 06:32:01', '2015-06-05 06:32:01', '20.00'),
+(20, 3, 200, '2015-06-08 06:52:01', '2015-06-08 06:52:01', '20.00'),
+(21, 8, 500, '2015-06-08 09:37:25', '2015-06-08 09:37:25', '26.00'),
+(22, 1, 20, '2015-06-08 09:41:43', '2015-06-08 09:41:43', '25.00'),
+(22, 3, 50, '2015-06-08 09:41:43', '2015-06-08 09:41:43', '20.00'),
+(23, 6, 20, '2015-06-08 09:51:43', '2015-06-08 09:51:43', '25.00'),
+(24, 7, 20, '2015-06-09 02:39:09', '2015-06-09 02:39:09', '25.00'),
+(25, 1, 25, '2015-06-09 09:05:42', '2015-06-09 09:05:42', '25.00'),
+(25, 2, 50, '2015-06-09 09:05:42', '2015-06-09 09:05:42', '28.00');
 
 -- --------------------------------------------------------
 
@@ -271,35 +269,63 @@ CREATE TABLE IF NOT EXISTS `order_order_status` (
   `status_id` int(10) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `extra` text COLLATE utf8_unicode_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `order_order_status`
 --
 
-INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, '2015-06-02 06:53:13', '2015-06-02 06:53:13'),
-(1, 2, 1, '2015-06-02 15:39:41', '2015-06-01 16:00:00'),
-(1, 3, 1, '2015-06-02 15:59:59', '0000-00-00 00:00:00'),
-(2, 1, 1, '2015-06-02 06:55:47', '2015-06-02 06:55:47'),
-(2, 3, 1, '2015-06-03 02:30:44', '2015-06-03 02:30:44'),
-(3, 1, 1, '2015-06-02 07:17:45', '2015-06-02 07:17:45'),
-(3, 2, 1, '2015-06-03 02:30:33', '2015-06-03 02:30:33'),
-(4, 1, 1, '2015-06-02 09:10:42', '2015-06-02 09:10:42'),
-(4, 2, 1, '2015-06-03 02:30:26', '2015-06-03 02:30:26'),
-(5, 1, 1, '2015-06-02 09:22:21', '2015-06-02 09:22:21'),
-(5, 4, 1, '2015-06-03 06:44:30', '2015-06-03 06:44:30'),
-(6, 1, 1, '2015-06-02 09:26:09', '2015-06-02 09:26:09'),
-(6, 3, 1, '2015-06-03 02:30:41', '2015-06-03 02:30:41'),
-(7, 1, 1, '2015-06-03 02:04:03', '2015-06-03 02:04:03'),
-(7, 3, 1, '2015-06-03 02:30:48', '2015-06-03 02:30:48'),
-(8, 1, 8, '2015-06-03 06:29:49', '2015-06-03 06:29:49'),
-(9, 1, 7, '2015-06-03 07:16:56', '2015-06-03 07:16:56'),
-(10, 1, 7, '2015-06-03 07:17:16', '2015-06-03 07:17:16'),
-(11, 1, 7, '2015-06-03 07:17:49', '2015-06-03 07:17:49'),
-(12, 1, 1, '2015-06-03 07:27:07', '2015-06-03 07:27:07'),
-(13, 1, 1, '2015-06-03 08:58:42', '2015-06-03 08:58:42');
+INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_at`, `updated_at`, `extra`) VALUES
+(1, 1, 1, '2015-06-02 06:53:13', '2015-06-02 06:53:13', NULL),
+(1, 2, 1, '2015-06-02 15:39:41', '2015-06-01 16:00:00', NULL),
+(1, 3, 1, '2015-06-02 15:59:59', '0000-00-00 00:00:00', NULL),
+(2, 1, 1, '2015-06-02 06:55:47', '2015-06-02 06:55:47', NULL),
+(2, 3, 1, '2015-06-03 02:30:44', '2015-06-03 02:30:44', NULL),
+(3, 1, 1, '2015-06-02 07:17:45', '2015-06-02 07:17:45', NULL),
+(3, 2, 1, '2015-06-03 02:30:33', '2015-06-03 02:30:33', NULL),
+(4, 1, 1, '2015-06-02 09:10:42', '2015-06-02 09:10:42', NULL),
+(4, 2, 1, '2015-06-03 02:30:26', '2015-06-03 02:30:26', NULL),
+(5, 1, 1, '2015-06-02 09:22:21', '2015-06-02 09:22:21', NULL),
+(5, 4, 1, '2015-06-03 06:44:30', '2015-06-03 06:44:30', NULL),
+(6, 1, 1, '2015-06-02 09:26:09', '2015-06-02 09:26:09', NULL),
+(6, 3, 1, '2015-06-03 02:30:41', '2015-06-03 02:30:41', NULL),
+(7, 1, 1, '2015-06-03 02:04:03', '2015-06-03 02:04:03', NULL),
+(7, 3, 1, '2015-06-03 02:30:48', '2015-06-03 02:30:48', NULL),
+(8, 1, 8, '2015-06-03 06:29:49', '2015-06-03 06:29:49', NULL),
+(9, 1, 7, '2015-06-03 07:16:56', '2015-06-03 07:16:56', NULL),
+(9, 3, 2, '2015-06-05 03:25:58', '2015-06-05 03:25:58', NULL),
+(10, 1, 7, '2015-06-03 07:17:16', '2015-06-03 07:17:16', NULL),
+(10, 4, 7, '2015-06-05 03:41:55', '2015-06-05 03:41:55', NULL),
+(11, 1, 7, '2015-06-03 07:17:49', '2015-06-03 07:17:49', NULL),
+(11, 2, 2, '2015-06-05 03:40:35', '2015-06-05 03:40:35', NULL),
+(12, 1, 1, '2015-06-03 07:27:07', '2015-06-03 07:27:07', NULL),
+(12, 4, 1, '2015-06-05 03:24:17', '2015-06-05 03:24:17', NULL),
+(13, 1, 1, '2015-06-03 08:58:42', '2015-06-03 08:58:42', NULL),
+(13, 2, 2, '2015-06-05 03:25:54', '2015-06-05 03:25:54', NULL),
+(14, 1, 1, '2015-06-05 02:56:50', '2015-06-05 02:56:50', NULL),
+(14, 3, 2, '2015-06-05 03:09:56', '2015-06-05 03:09:56', NULL),
+(15, 1, 8, '2015-06-05 03:00:59', '2015-06-05 03:00:59', NULL),
+(16, 1, 8, '2015-06-05 03:01:23', '2015-06-05 03:01:23', NULL),
+(16, 2, 9, '2015-06-05 03:21:53', '2015-06-05 03:21:53', NULL),
+(17, 1, 1, '2015-06-05 03:07:42', '2015-06-05 03:07:42', NULL),
+(17, 2, 2, '2015-06-05 03:09:43', '2015-06-05 03:09:43', NULL),
+(18, 1, 7, '2015-06-05 06:31:40', '2015-06-05 06:31:40', NULL),
+(18, 2, 9, '2015-06-05 06:32:45', '2015-06-05 06:32:45', NULL),
+(19, 1, 7, '2015-06-05 06:32:01', '2015-06-05 06:32:01', NULL),
+(19, 4, 7, '2015-06-05 06:32:10', '2015-06-05 06:32:10', NULL),
+(20, 1, 1, '2015-06-08 06:52:01', '2015-06-08 06:52:01', NULL),
+(20, 2, 2, '2015-06-08 09:39:51', '2015-06-08 09:39:51', NULL),
+(21, 1, 1, '2015-06-08 07:26:23', '2015-06-08 07:26:23', NULL),
+(21, 4, 1, '2015-06-08 09:37:37', '2015-06-08 09:37:37', NULL),
+(22, 1, 1, '2015-06-08 09:41:43', '2015-06-08 09:41:43', NULL),
+(22, 3, 9, '2015-06-09 04:02:39', '2015-06-09 04:02:39', NULL),
+(23, 1, 1, '2015-06-08 09:51:43', '2015-06-08 09:51:43', NULL),
+(23, 4, 1, '2015-06-09 05:12:00', '2015-06-09 05:12:00', 'I do not like coke anymore'),
+(24, 1, 1, '2015-06-09 02:39:09', '2015-06-09 02:39:09', NULL),
+(24, 2, 9, '2015-06-09 04:04:09', '2015-06-09 04:04:09', 'i really like the po number. do more of these. here''s a script for you. alert(''hello'')'),
+(25, 1, 8, '2015-06-09 09:05:42', '2015-06-09 09:05:42', NULL);
 
 -- --------------------------------------------------------
 
@@ -413,30 +439,6 @@ INSERT INTO `roles` (`id`, `name`, `description`, `created_at`, `updated_at`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `settings`
---
-
-CREATE TABLE IF NOT EXISTS `settings` (
-  `id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `value` varchar(255) COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `settings`
---
-
-INSERT INTO `settings` (`id`, `value`) VALUES
-('DATE_FORMAT', 'yyyy-mm-dd'),
-('DATE_FORMAT_MYSQL_YMD', '%Y-%m-%d'),
-('DATE_FORMAT_PHP', 'Y-m-d'),
-('DEFAULT_CREDIT', '50000'),
-('MAX_QUANTITY', '500'),
-('PESO_SYMBOL', '₱'),
-('PICKUP_DAYS_COUNT', '7');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `users`
 --
 
@@ -457,11 +459,11 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `remember_token`, `created_at`, `updated_at`, `role_id`, `customer_id`) VALUES
-(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'VwAqSfLdFkgzqpOgDgNPNj5CaUCJZeIBqrupPLD3jSNf0zZd5iHWBr1xdApD', '2015-06-01 07:43:42', '2015-06-03 07:21:21', 1, 1),
-(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', 'wx81LqcqsXrhXCPeSqp5dgXuiBXJ2PBiFD2s8yYJf0PLQ9UQsZfFLiGMJx8X', '2015-06-01 07:44:06', '2015-06-03 06:54:52', 3, 2),
-(7, 'jennifer_law', 'jennifer@lawrence.com', '$2y$10$QFiydHgJQnFJINtM/dhCEuRLLfM50xf1KmfUFeMGKRRxNvpYOPz02', 'MvaN4LpTWN4ULrTlhFypczFZHdB9NyHcIt1Z1Tz0InKu7z2lxNsTwULPeU2r', '2015-06-03 06:11:55', '2015-06-03 07:17:52', 1, 7),
-(8, 'scarlette', 'scar@lette.com', '$2y$10$EZuV4ipFaQ81u1ecGuRjWOiUARjtXZnJGouGoVJSYQI3AMTjdOdGK', '0Lkk5PYs7a36KyOskMlrVFEUhJjyUxAHSKuDT2ieBZYNH3GQue27vwfSub9I', '2015-06-03 06:13:15', '2015-06-03 07:15:13', 2, 8),
-(9, 'jem', 'jem@milton.com', '$2y$10$4u79ZNnxuv8kfdg4Ls2QLuzRJ8W8ZkVecBFra8cHWUYK4dPmgK58q', '0ZYrtsJ6QbxEevLNLuEKFhFlw5C3jvWlUDwluIjXTsLiY3VaO9d9iJMNpCRM', '2015-06-03 06:14:22', '2015-06-03 07:20:01', 3, 9);
+(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'H5kVIfQZkQ2OPPYYcEJWJC2yWrnagNPk1SY3GzaZiIRXx8hgkdsuz61vTlk1', '2015-06-01 07:43:42', '2015-06-09 07:37:56', 1, 1),
+(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', '6RngOKrdAKG7NlZ9QDh4TVlP7Z5zEAY7gF5RnfKFbcLK1bwqI1VNFR2EWKCO', '2015-06-01 07:44:06', '2015-06-09 09:05:05', 3, 2),
+(7, 'jennifer_law', 'jennifer@lawrence.com', '$2y$10$QFiydHgJQnFJINtM/dhCEuRLLfM50xf1KmfUFeMGKRRxNvpYOPz02', 'exgi7aHYish0mT7Rw31oOmPVzg5plxQWeJoDAui3qVcmwyLEVXcvhlxcdas9', '2015-06-03 06:11:55', '2015-06-05 06:34:10', 1, 7),
+(8, 'scarlette', 'scar@lette.com', '$2y$10$EZuV4ipFaQ81u1ecGuRjWOiUARjtXZnJGouGoVJSYQI3AMTjdOdGK', 'uUJx8b1kEOd7ZjMXrBAed0A23kkojzq9qsz5OwG0dDP0BKZhA5LWsbR5vXn8', '2015-06-03 06:13:15', '2015-06-09 09:06:04', 2, 8),
+(9, 'jem', 'jem@milton.com', '$2y$10$4u79ZNnxuv8kfdg4Ls2QLuzRJ8W8ZkVecBFra8cHWUYK4dPmgK58q', '1zAnS866vBkX4jV4MGRB4ViuLwW9H3csCeIZoFo6lyuka2xgrrv1cd4ePxWw', '2015-06-03 06:14:22', '2015-06-09 05:11:38', 3, 9);
 
 -- --------------------------------------------------------
 
@@ -2755,24 +2757,6 @@ INSERT INTO `zipcodes` (`id`, `country`, `major_area`, `zip_code`, `city`) VALUE
 (2269, 'PH', 'Zamboanga Sibugay', '7012', 'Talusan'),
 (2270, 'PH', 'Zamboanga Sibugay', '7003', 'Titay');
 
--- --------------------------------------------------------
-
---
--- Structure for view `orders_vw`
---
-DROP TABLE IF EXISTS `orders_vw`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `orders_vw` AS select `o`.`id` AS `id`,`u`.`id` AS `user_id`,`o`.`po_number` AS `po_number`,`o`.`order_date` AS `order_date`,`o`.`pickup_date` AS `pickup_date`,concat(concat(concat(concat(`c`.`first_name`,' '),`c`.`middle_name`),' '),`c`.`last_name`) AS `customer`,sum((`od`.`quantity` * `od`.`unit_price`)) AS `total_amount`,(select `os`.`name` from (`order_order_status` `oos` join `order_status` `os` on((`oos`.`status_id` = `os`.`id`))) where (`oos`.`order_id` = `o`.`id`) order by `oos`.`created_at` desc limit 1) AS `status` from (((`orders` `o` join `customers` `c` on((`o`.`customer_id` = `c`.`id`))) join `order_details` `od` on((`o`.`id` = `od`.`order_id`))) join `users` `u` on((`c`.`id` = `u`.`customer_id`))) group by `o`.`po_number`;
-
--- --------------------------------------------------------
-
---
--- Structure for view `order_details_vw`
---
-DROP TABLE IF EXISTS `order_details_vw`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `order_details_vw` AS select `od`.`order_id` AS `order_id`,`p`.`name` AS `product`,`pc`.`name` AS `category`,`p`.`uom` AS `uom`,`od`.`unit_price` AS `unit_price`,`od`.`quantity` AS `quantity`,(`od`.`quantity` * `od`.`unit_price`) AS `price` from ((`products` `p` join `product_category` `pc` on((`p`.`category_id` = `pc`.`id`))) join `order_details` `od` on((`od`.`product_id` = `p`.`id`)));
-
 --
 -- Indexes for dumped tables
 --
@@ -2845,12 +2829,6 @@ ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `settings`
---
-ALTER TABLE `settings`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -2889,7 +2867,7 @@ ALTER TABLE `customer_credits`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=14;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;
 --
 -- AUTO_INCREMENT for table `order_status`
 --

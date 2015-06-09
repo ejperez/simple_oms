@@ -36,10 +36,7 @@ elixir(function(mix) {
 		'vendor/datatables/media/js/jquery.dataTables.min.js',
 		'vendor/handlebars/handlebars.min.js',		
 		'vendor/select2/dist/js/select2.min.js',
-		'js/date_add_date.js',
-		'js/datepicker_fix.js',
-		'js/handlebars_helpers.js',
-		'js/js_php_date.js',				
+		'js/custom.js',
 	], 'public/js/app.js', 'resources/assets');
 
 	// Versioning

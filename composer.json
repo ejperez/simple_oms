@@ -22,7 +22,10 @@
 		],
 		"psr-4": {
 			"SimpleOMS\\": "app/"
-		}
+		},
+        "files": [
+            "app/Helpers/helpers.php"
+        ]
 	},
 	"autoload-dev": {
 		"classmap": [

@@ -23,7 +23,38 @@
     </div>
 </div>
 
-{!! Form::open(['url' => '', 'name' => 'update_order_status_form', 'id' => 'update_order_status_form', 'method' => 'PUT']) !!}{!! Form::close() !!}
+<!-- Modal -->
+<div id="update_order_status_modal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Confirm Change of Order Status</h4>
+            </div>
+            <div class="modal-body">
+                {!! Form::open(['url' => '', 'name' => 'update_order_status_form', 'id' => 'update_order_status_form', 'method' => 'PUT']) !!}
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>PO Number:</label>
+                        <label id="lbl_po_number" style="font-weight:bold"></label><br/>
+                        <label>Change status to:</label>
+                        <label id="lbl_status" style="font-weight:bold"></label><br/>
+                        <label for="reason">Optional message:</label>
+                        <textarea class="form-control" name="extra" id="extra" cols="30" rows="5"></textarea>
+                    </div>
+                </div>
+
+                {!! Form::close() !!}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="btn_confirm">Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 @section('js')
     <script id="details-template" type="text/x-handlebars-template">
@@ -43,26 +74,43 @@
                 <td>@{{ product }}</td>
                 <td>@{{ category }}</td>
                 <td>@{{ uom }}</td>
-                <td>@{{ unit_price }}</td>
-                <td>@{{ quantity }}</td>
-                <td>@{{ price }}</td>
+                <td class="text-right">@{{ unit_price }}</td>
+                <td class="text-right">@{{ quantity }}</td>
+                <td class="text-right">@{{ price }}</td>
             </tr>
             @{{/each}}
             </tbody>
         </table>
+        @{{#hasClass status 'Cancelled'}}
+        <div role="alert" class="alert alert-warning">
+            <p>Reason:<br/><strong>@{{ extra }}</strong></p>
+        </div>
+        @{{/hasClass}}
+        @{{#hasClass status 'Disapproved'}}
+        <div role="alert" class="alert alert-danger">
+            <p>Disapproved by:<br/><strong>@{{ user }}</strong></p>
+            <p>Comment:<br/><strong>@{{ extra }}</strong></p>
+        </div>
+        @{{/hasClass}}
+        @{{#hasClass status 'Approved'}}
+        <div role="alert" class="alert alert-success">
+            <p>Approved by:<br/><strong>@{{ user }}</strong></p>
+            <p>Comment:<br/><strong>@{{ extra }}</strong></p>
+        </div>
+        @{{/hasClass}}
     </script>
 
     <script id="order-options-template"  type="text/x-handlebars-template">
         @{{#hasClass class 'Pending'}}
 
         @if ($role == 'Approver')
-        <a class="btn btn-default btn-xs btn-approve" data-order-id="@{{ id }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span></a>
-        <a class="btn btn-default btn-xs btn-disapprove" data-order-id="@{{ id }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span></a>
+        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-approve" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span></a>
+        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-disapprove" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span></a>
         @endif
 
         @if ($role == 'Sales' || $role == 'Administrator')
         <a class="btn btn-default btn-xs" href="{{ url('orders') }}/@{{ id }}/edit" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
-        <a class="btn btn-default btn-xs btn-cancel" data-order-id="@{{ id }}" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span></a>
+        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-cancel" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span></a>
         @endif
         @{{/hasClass}}
     </script>
@@ -73,6 +121,12 @@
 
         var $tbl_history = $('#tbl_history'),
                 $update_order_status_form = $('form#update_order_status_form'),
+
+                $update_order_status_modal = $('div#update_order_status_modal'),
+                $btn_confirm = $('button#btn_confirm'),
+                $lbl_status = $('label#lbl_status'),
+                $lbl_po_number = $('label#lbl_po_number'),
+
                 dt_history = null;
 
         $(document).ready(function() {
@@ -80,6 +134,8 @@
             dt_history = $tbl_history.DataTable({
                 processing: true,
                 serverSide: true,
+                displayLength: 10,
+                lengthChange: false,
                 searchDelay: 400,
                 ajax: "{{ url('get-orders-datatable') }}",
                 scrollX: true,
@@ -117,6 +173,12 @@
 
             // Add option buttons
             dt_history.on( 'draw.dt', function () {
+                // Format total amount
+                $('#tbl_history tbody td:nth-child(6)').each(function(){
+                    $(this).html( parseInt($(this).html()).format(2, 3, ',', '.') );
+                    $(this).addClass('text-right');
+                });
+
                 // Add options
                 $('#tbl_history tbody td.options-control').each(function(){
                     var td = $(this),
@@ -124,7 +186,8 @@
 
                     td.html(options({
                         id: tr.attr('id'),
-                        class: tr.attr('class')
+                        class: tr.attr('data-status'),
+                        po_number: tr.attr('data-po-number')
                     }));
                 });
             } );
@@ -141,6 +204,15 @@
                     tr.find('td.details-control').html('<span class="glyphicon glyphicon-collapse-down"></span>');
                 }
                 else {
+                    // Check if extra is not null
+                    row.data().extra = row.data().extra || 'No comment provided.';
+
+                    // Format unit price and price
+                    $.each(row.data().details, function(index, value){
+                        row.data().details[index].unit_price = parseInt( value.unit_price ).format(2, 3, ',', '.');
+                        row.data().details[index].price = parseInt( value.price ).format(2, 3, ',', '.');
+                    });
+
                     // Open this row
                     row.child( template(row.data()) ).show();
                     tr.addClass('shown');
@@ -150,9 +222,18 @@
 
             // Update status buttons click event
             $tbl_history.on('click', 'a.btn-approve, a.btn-disapprove, a.btn-cancel', function(){
-                // Update url of hidden form
+                // Update url of form
                 var url = '{{ url('orders')  }}/' + $(this).attr('data-order-id') + '/update-{{ Auth::user()->hasRole('approver') ? 'approver' : 'customer' }}-status/' + $(this).attr('data-status');
-                $update_order_status_form.attr('action', url).submit();
+                $update_order_status_form.attr('action', url);
+
+                // Update labels
+                $lbl_status.html($(this).attr('data-status'));
+                $lbl_po_number.html($(this).attr('data-po-number'));
+            });
+
+            // Confirm button
+            $btn_confirm.click(function(){
+                $update_order_status_form.submit();
             });
         });
 

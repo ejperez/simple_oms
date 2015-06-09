@@ -1,9 +1,5 @@
 <?php namespace SimpleOMS\Handlers\Events;
 
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldBeQueued;
-use Session;
-
 class AuthLoginEventHandler {
 
 	/**

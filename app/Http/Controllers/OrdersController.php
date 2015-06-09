@@ -6,9 +6,8 @@ use SimpleOMS\Order_Detail;
 use SimpleOMS\Order_Status;
 use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
-use Hashids\Hashids;
+use SimpleOMS\Helpers\Helpers;
 use Datatables;
-use Config;
 use Redirect;
 use Session;
 use Input;
@@ -45,9 +44,8 @@ class OrdersController extends Controller {
         $categories = Product_Category::orderBy('name')->get();
 
         // Hash categories
-        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
         foreach ($categories as $key => $category){
-            $category->id = $hashids->encode($category->id);
+            $category->id = Helpers::hash($category->id);
         }
 
         // Get remaining credit
@@ -138,17 +136,15 @@ class OrdersController extends Controller {
         $categories = Product_Category::orderBy('name')->get();
 
         // Hash categories
-        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
         foreach ($categories as $key => $category){
-            $category->id = $hashids->encode($category->id);
+            $category->id = Helpers::hash($category->id);
         }
 
         // Get remaining credit
         $credit = Auth::user()->customer->credit->credit_remaining;
 
         // Hash id
-        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
-        $order->id = $hashids->encode($order->id);
+        $order->id = Helpers::hash($order->id);
 
         $title = 'Edit Order';
 
@@ -225,7 +221,8 @@ class OrdersController extends Controller {
         Order_Order_Status::create([
             'order_id' => $order->id,
             'status_id' => Order_Status::where('name', 'like', $status)->first()->id,
-            'user_id' => Auth::user()->id
+            'user_id' => Auth::user()->id,
+            'extra' => strip_tags(Input::get('extra'))
         ]);
 
         // Redirect to list of orders

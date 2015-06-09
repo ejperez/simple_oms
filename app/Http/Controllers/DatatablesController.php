@@ -1,10 +1,10 @@
 <?php namespace SimpleOMS\Http\Controllers;
 
-use SimpleOMS\Http\Requests;
 use Illuminate\Support\Collection;
-use Hashids\Hashids;
+use SimpleOMS\Helpers\Helpers;
+use SimpleOMS\Order;
+use SimpleOMS\Http\Requests;
 use Datatables;
-use Config;
 use Auth;
 use DB;
 
@@ -16,35 +16,73 @@ class DatatablesController extends Controller {
      */
     public function getOrders()
     {
+        //DB::enableQueryLog();
+
         // Approvers can view orders from all customers
         // Administrators and Sales can only view their orders
 
+        // Eager loading
         if (Auth::user()->hasRole(['approver'])){
-            $orders = DB::table('orders_vw')->get();
+            $orders = Order::with('customer', 'details', 'details.product', 'details.product.category', 'status')
+                ->get();
         } else {
-            $orders = DB::table('orders_vw')->where('user_id', '=', Auth::user()->id)->get();
+            $orders = Order::where('customer_id', '=', Auth::user()->customer->id)
+                ->with('\SimpleOMS\Customer')
+                ->get();
         }
-
-        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
 
         $order_collection = new Collection();
 
         foreach ($orders as $order){
+            // Get customer
+            $customer = $order->customer;
+
+            // Get details and compute total amount
+            $details = $order->details;
+            $total = 0;
+            $order_details = new Collection();
+            foreach ($details as $detail){
+                $product = $detail->product;
+                $category = $product->category;
+
+                $order_details->push([
+                    'order_id' =>  Helpers::hash($detail->order_id),
+                    'product' => $product->name,
+                    'category' => $category->name,
+                    'uom' => $product->uom,
+                    'unit_price' => $detail->unit_price,
+                    'quantity' => $detail->quantity,
+                    'price' => ($detail->unit_price * $detail->quantity)
+                ]);
+
+                $total += $detail->quantity * $detail->unit_price;
+            }
+
+            // Latest status
+            $latest_status = $order->status()->orderBy('created_at', 'desc')->first();
+
             $order_collection->push([
-                'id' => $hashids->encode($order->id),
+                'id' => Helpers::hash($order->id),
                 'po_number' => $order->po_number,
                 'order_date' => $order->order_date,
                 'pickup_date' => $order->pickup_date,
-                'customer' => $order->customer,
-                'total_amount' => $order->total_amount,
-                'status' => $order->status,
-                'details' => DB::table('order_details_vw')->where('order_id', '=', $order->id)->get()
+                'customer' => $customer->fullName(),
+                'total_amount' => $total,
+                'status' => $latest_status->status->name,
+                'user' => $latest_status->user->customer->fullName(),
+                'extra' => $latest_status->extra,
+                'details' => $order_details->toArray()
             ]);
         }
 
+        //var_dump(DB::getQueryLog());
+
+        //dd($order_collection->toArray());
+
         return Datatables::of($order_collection)
             ->setRowId('id')
-            ->setRowClass('status')
+            ->addRowAttr('data-po-number', '{{ $po_number }}')
+            ->addRowAttr('data-status', '{{ $status }}')
             ->make(true);
     }
 }
