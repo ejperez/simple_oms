@@ -16,6 +16,11 @@ class Order extends Model {
         return $this->hasMany('SimpleOMS\Order_Order_Status', 'order_id', 'id');
     }
 
+    public function latestStatus()
+    {
+        return $this->hasMany('SimpleOMS\Order_Order_Status', 'order_id', 'id')->orderBy('created_at', 'desc')->first();
+    }
+
     public function customer()
     {
         return $this->belongsTo('SimpleOMS\Customer', 'customer_id', 'id');

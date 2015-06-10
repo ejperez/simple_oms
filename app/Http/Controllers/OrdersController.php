@@ -1,5 +1,6 @@
 <?php namespace SimpleOMS\Http\Controllers;
 
+use SimpleOMS\Customer;
 use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
 use SimpleOMS\Order_Detail;
@@ -69,10 +70,18 @@ class OrdersController extends Controller {
         $quantities = Input::get('quantity');
         $unit_prices = Input::get('unit_price');
 
-        if ($this->computeTotalAmount($products, $quantities, $unit_prices) == 0){
+        $credits = Auth::user()->customer->credit->credit_remaining;
+        $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
+
+        if ($total == 0){
             Session::flash('error_message', 'Total amount is zero.');
             return Redirect::back()->withInput(Input::all());
         } else {
+            if ($total > $credits){
+                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
+                return Redirect::back()->withInput(Input::all());
+            }
+
             // Save to database
             $order               = new Order();
             $order->po_number    = Input::get('po_number');
@@ -163,13 +172,18 @@ class OrdersController extends Controller {
         $quantities = Input::get('quantity');
         $unit_prices = Input::get('unit_price');
 
-        if ($this->computeTotalAmount($products, $quantities, $unit_prices) == 0)
-        {
+        $credits = Auth::user()->customer->credit->credit_remaining;
+        $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
+
+        if ($total == 0) {
             Session::flash('error_message', 'Total amount is zero.');
             return Redirect::back()->withInput(Input::all());
-        }
-        else
-        {
+        }  else {
+            if ($total > $credits){
+                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
+                return Redirect::back()->withInput(Input::all());
+            }
+
             $order->po_number    = Input::get('po_number');
             $order->order_date   = Input::get('order_date');
             $order->pickup_date  = Input::get('pickup_date');
@@ -217,6 +231,29 @@ class OrdersController extends Controller {
 
     public function updateStatus(Order $order, $status)
     {
+        // Check if current status is pending
+        $current_status = $order->status()->orderBy('created_at', 'desc')->first()->status->name;
+        if ($current_status != 'Pending'){
+            Session::flash('error_message', "Unable to change order status. Current status is not pending ($current_status).");
+            return Redirect::back()->withInput(Input::all());
+        }
+
+        // For approval, check if user credits is more than or equal to total amount
+        $total = 0;
+        if ($status == 'Approved'){
+            $details = $order->details;
+            $credits = $order->customer->credit->credit_remaining;
+
+            foreach ($details as $detail){
+                $total += $detail->quantity * $detail->unit_price;
+            }
+
+            if ($total > $credits){
+                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
+                return Redirect::back()->withInput(Input::all());
+            }
+        }
+
         // Save status
         Order_Order_Status::create([
             'order_id' => $order->id,
@@ -224,6 +261,11 @@ class OrdersController extends Controller {
             'user_id' => Auth::user()->id,
             'extra' => strip_tags(Input::get('extra'))
         ]);
+
+        // Subtract total amount to customer credits
+        $credit = Customer::find($order->customer_id)->credit;
+        $credit->credit_remaining -= $total;
+        $credit->update();
 
         // Redirect to list of orders
         Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was '.strtolower($status).'.');

@@ -4,20 +4,27 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <table id="tbl_history" class="table display" cellspacing="0">
+            <table id="tbl_history" class="table table-condensed display" cellspacing="0">
                 <thead>
-                <tr>
-                    <th></th>
-                    <th>PO Number</th>
-                    <th>Order Date</th>
-                    <th>Pickup Date</th>
-                    <th>Customer</th>
-                    <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                    <th>Status</th>
-                    <th width="100">Options</th>
-                </tr>
+                    <tr>
+                        <th>PO Number</th>
+                        <th>Order Date</th>
+                        <th>Pickup Date</th>
+                        <th>Customer</th>
+                        <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                        <th>Status</th>
+                    </tr>
                 </thead>
-                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <th>PO Number</th>
+                        <th>Order Date</th>
+                        <th>Pickup Date</th>
+                        <th>Customer</th>
+                        <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                        <th>Status</th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -55,6 +62,15 @@
 
     </div>
 </div>
+
+@section('css')
+    <style>
+        #tbl_history tr.shown td
+        {
+            background:#76b4ff !important;
+        }
+    </style>
+@endsection
 
 @section('js')
     <script id="details-template" type="text/x-handlebars-template">
@@ -98,26 +114,29 @@
             <p>Comment:<br/><strong>@{{ extra }}</strong></p>
         </div>
         @{{/hasClass}}
-    </script>
+        @{{#hasClass status 'Pending'}}
+        <table class="table">
+            <caption><strong>Options</strong></caption>
+            <tr>
+                <td>
+                    @if ($role == 'Approver')
+                        <p><label>Customer Credits ({{ Config::get('constants.PESO_SYMBOL') }}) : </label> <strong>@{{ credits }}</strong></p>
+                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-approve" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span> Approve</a>
+                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-disapprove" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span> Disapprove</a>
+                    @endif
 
-    <script id="order-options-template"  type="text/x-handlebars-template">
-        @{{#hasClass class 'Pending'}}
-
-        @if ($role == 'Approver')
-        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-approve" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span></a>
-        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-disapprove" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span></a>
-        @endif
-
-        @if ($role == 'Sales' || $role == 'Administrator')
-        <a class="btn btn-default btn-xs" href="{{ url('orders') }}/@{{ id }}/edit" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
-        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-xs btn-cancel" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span></a>
-        @endif
+                    @if ($role == 'Sales' || $role == 'Administrator')
+                        <a class="btn btn-default" href="{{ url('orders') }}/@{{ id }}/edit" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-cancel" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span> Cancel</a>
+                    @endif
+                </td>
+            </tr>
+        </table>
         @{{/hasClass}}
     </script>
 
     <script>
-        var options = Handlebars.compile($("#order-options-template").html()),
-                template = Handlebars.compile($("#details-template").html());
+        var template = Handlebars.compile($("#details-template").html());
 
         var $tbl_history = $('#tbl_history'),
                 $update_order_status_form = $('form#update_order_status_form'),
@@ -140,60 +159,48 @@
                 ajax: "{{ url('get-orders-datatable') }}",
                 scrollX: true,
                 columns: [
-                    {
-                        "className":      'details-control',
-                        "orderable":      false,
-                        "data":           null,
-                        "searchable":     false,
-                        "defaultContent": '<span class="glyphicon glyphicon-collapse-down"></span>'
-                    },
                     {data: "po_number"},
                     {data: "order_date"},
                     {data: "pickup_date"},
                     {data: "customer"},
                     {data: "total_amount"},
-                    {data: "status"},
-                    {
-                        "className": 'options-control',
-                        "orderable": false,
-                        "data": null,
-                        "searchable":     false,
-                        "defaultContent": ''
-                    }
+                    {data: "status"}
                 ],
-                order: [[2, 'desc']]
-            });
+                order: [[1, 'desc']],
+                initComplete: function () {
+                    // Add search box per column
+                    this.api().columns().every(function () {
+                        var column = this,
+                                $input = $(document.createElement('input')),
+                                $footer = $(column.footer());
 
-            // Disable automatic searching every keypress, wait for ENTER key instead
-            $('#tbl_history_filter input').unbind().bind('keyup', function(e) {
-                if(e.keyCode == 13) {
-                    dt_history.search(this.value).draw();
-                }
+
+                        $('input').css('width', '100%');
+                        $footer.css('padding', '10px');
+
+                        $input.appendTo($footer)
+                                .on('change', function () {
+                                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                    column.search(val ? val : '', true, false).draw();
+                                });
+
+                    // Hide top search box
+                    $('#tbl_history_filter').remove();
+                });
+            }
             });
 
             // Add option buttons
             dt_history.on( 'draw.dt', function () {
                 // Format total amount
-                $('#tbl_history tbody td:nth-child(6)').each(function(){
+                $('#tbl_history tbody td:nth-child(5)').each(function(){
                     $(this).html( parseInt($(this).html()).format(2, 3, ',', '.') );
                     $(this).addClass('text-right');
                 });
-
-                // Add options
-                $('#tbl_history tbody td.options-control').each(function(){
-                    var td = $(this),
-                            tr = td.closest('tr');
-
-                    td.html(options({
-                        id: tr.attr('id'),
-                        class: tr.attr('data-status'),
-                        po_number: tr.attr('data-po-number')
-                    }));
-                });
-            } );
+            });
 
             // Add event listener for opening and closing details
-            $tbl_history.find('tbody').on('click', 'td.details-control', function () {
+            $tbl_history.find('tbody').on('click', 'tr', function () {
                 var tr = $(this).closest('tr');
                 var row = dt_history.row( tr );
 
@@ -201,22 +208,24 @@
                     // This row is already open - close it
                     row.child.hide();
                     tr.removeClass('shown');
-                    tr.find('td.details-control').html('<span class="glyphicon glyphicon-collapse-down"></span>');
                 }
                 else {
-                    // Check if extra is not null
-                    row.data().extra = row.data().extra || 'No comment provided.';
+                    if (row.data().status != 'Pending'){
+                        // Check if extra is not null
+                        row.data().extra = row.data().extra || 'No comment provided.';
+                    }
 
-                    // Format unit price and price
+                    // Format unit price, price, credits
                     $.each(row.data().details, function(index, value){
                         row.data().details[index].unit_price = parseInt( value.unit_price ).format(2, 3, ',', '.');
                         row.data().details[index].price = parseInt( value.price ).format(2, 3, ',', '.');
                     });
 
+                    row.data().credits = parseInt( row.data().credits ).format(2, 3, ',', '.');
+
                     // Open this row
                     row.child( template(row.data()) ).show();
                     tr.addClass('shown');
-                    tr.find('td.details-control').html('<span class="glyphicon glyphicon-collapse-up"></span>');
                 }
             });
 
