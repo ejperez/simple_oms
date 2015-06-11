@@ -3,29 +3,28 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-9">
             <table id="tbl_history" class="table table-condensed display" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>PO Number</th>
-                        <th>Order Date</th>
-                        <th>Pickup Date</th>
-                        <th>Customer</th>
-                        <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                        <th>Status</th>
+                        <th class="text">PO Number</th>
+                        <th class="date">Order Date</th>
+                        <th class="date">Pickup Date</th>
+                        <th class="text">Customer</th>
+                        <th class="number">Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                        <th class="status">Status</th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th>PO Number</th>
-                        <th>Order Date</th>
-                        <th>Pickup Date</th>
-                        <th>Customer</th>
-                        <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                        <th>Status</th>
-                    </tr>
-                </tfoot>
             </table>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Filters</h3>
+                </div>
+                <div class="panel-body" id="filters">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -105,12 +104,14 @@
         @{{#hasClass status 'Disapproved'}}
         <div role="alert" class="alert alert-danger">
             <p>Disapproved by:<br/><strong>@{{ user }}</strong></p>
+            <p>Date:<br/><strong>@{{ change_status_date.date }}</strong></p>
             <p>Comment:<br/><strong>@{{ extra }}</strong></p>
         </div>
         @{{/hasClass}}
         @{{#hasClass status 'Approved'}}
         <div role="alert" class="alert alert-success">
             <p>Approved by:<br/><strong>@{{ user }}</strong></p>
+            <p>Date:<br/><strong>@{{ change_status_date.date }}</strong></p>
             <p>Comment:<br/><strong>@{{ extra }}</strong></p>
         </div>
         @{{/hasClass}}
@@ -146,7 +147,8 @@
                 $lbl_status = $('label#lbl_status'),
                 $lbl_po_number = $('label#lbl_po_number'),
 
-                dt_history = null;
+                dt_history = null,
+                base_dt_ajax = "{{ url('get-orders-datatable') }}";
 
         $(document).ready(function() {
             // Initialize history datatable
@@ -156,7 +158,7 @@
                 displayLength: 10,
                 lengthChange: false,
                 searchDelay: 400,
-                ajax: "{{ url('get-orders-datatable') }}",
+                ajax: base_dt_ajax,
                 scrollX: true,
                 columns: [
                     {data: "po_number"},
@@ -168,24 +170,98 @@
                 ],
                 order: [[1, 'desc']],
                 initComplete: function () {
+                    var $filters = $('div#filters');
+
                     // Add search box per column
                     this.api().columns().every(function () {
                         var column = this,
-                                $input = $(document.createElement('input')),
-                                $footer = $(column.footer());
+                                $input = null,
+                                $header = $(column.header());
 
+                        // Create corresponding input type for each column
+                        if ($header.hasClass('text')){
+                            $input = $(document.createElement('input'));
 
-                        $('input').css('width', '100%');
-                        $footer.css('padding', '10px');
+                            $filters.append($header.html());
+                            $input.appendTo($filters)
+                                    .on('change', function () {
+                                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                        column.search(val ? val : '', true, false).draw();
+                                    });
+                        } else if ($header.hasClass('number')){
+                            $input = $(document.createElement('input'));
 
-                        $input.appendTo($footer)
-                                .on('change', function () {
-                                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                                    column.search(val ? val : '', true, false).draw();
-                                });
+                            $filters.append($header.html());
+                            $input.appendTo($filters)
+                                    .on('change', function () {
+                                        var val = $(this).val();
 
-                    // Hide top search box
-                    $('#tbl_history_filter').remove();
+                                        if (val != ''){
+                                            if (val <= 0){
+                                                alert('Amount must be more than zero.');
+                                                return false;
+                                            }
+
+                                            if (isNaN(val)){
+                                                alert('Please enter numeric values only.');
+                                                return false;
+                                            }
+                                        }
+
+                                        column.search(val ? val : '', true, false).draw();
+                                    });
+                        } else if ($header.hasClass('date')){
+                            $input = $(document.createElement('input'));
+
+                            $filters.append($header.html());
+                            $input.appendTo($filters)
+                                    .on('change', function () {
+                                        var val = $(this).val();
+
+                                        column.search(val ? val : '', true, false).draw();
+                                    });
+
+                            $input.datepicker({
+                                disableTouchKeyboard:   true,
+                                format:                 '{{ Config::get('constants.DATE_FORMAT') }}'
+                            }).on('changeDate', function(){
+                                $(this).datepicker('hide');
+                            });
+                        } else if ($header.hasClass('status')){
+                            $input = $(document.createElement('select'));
+                            $input.attr('multiple', 'multiple');
+                            $input.css('width', '100%');
+
+                            @foreach ($status as $value)
+                                var option = document.createElement("option");
+                                option.text = "{{ $value->name }}";
+                                $input.append(option);
+                            @endforeach
+
+                            $filters.append($header.html());
+                            $input.appendTo($filters)
+                                    .on('change', function (e) {
+                                        // Modify ajaxurl of datatable
+                                        var url = base_dt_ajax + '?';
+
+                                        $($(this).val()).each(function(index, value){
+                                            url += 'status[]=' + value + '&';
+                                        });
+
+                                        dt_history.ajax.url(url);
+                                        dt_history.ajax.reload();
+                                    });
+
+                            $input.select2();
+
+                            @if ($role == 'Approver')
+                                // For approver, pending orders are displayed first
+                                $input.val(['Pending']).trigger('change');
+                            @endif
+                        }
+
+                        // Adjust input width
+                        $input.addClass('form-control');
                 });
             }
             });
@@ -197,6 +273,9 @@
                     $(this).html( parseInt($(this).html()).format(2, 3, ',', '.') );
                     $(this).addClass('text-right');
                 });
+
+                // Hide top search box
+                $('#tbl_history_filter').remove();
             });
 
             // Add event listener for opening and closing details
@@ -221,7 +300,12 @@
                         row.data().details[index].price = parseInt( value.price ).format(2, 3, ',', '.');
                     });
 
+                    // Format credits
                     row.data().credits = parseInt( row.data().credits ).format(2, 3, ',', '.');
+
+                    // Format change status date
+                    var date = new Date( row.data().change_status_date.date );
+                    row.data().change_status_date.date = date.format('Y-m-d');
 
                     // Open this row
                     row.child( template(row.data()) ).show();
@@ -244,7 +328,13 @@
             $btn_confirm.click(function(){
                 $update_order_status_form.submit();
             });
-        });
+
+            @if ($role == 'Approver')
+                // For approver, pending orders are displayed first
+                dt_history.ajax.url(base_dt_ajax + '?status[]=Pending');
+                dt_history.ajax.reload();
+            @endif
+    });
 
     </script>
 @endsection('js')

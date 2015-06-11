@@ -26,9 +26,12 @@ class OrdersController extends Controller {
         // Get roles
         $role = Auth::user()->role->name;
 
+        // Get order status
+        $status = Order_Status::all();
+
         $title = 'List of Orders';
 
-		return view('orders.index', compact('role', 'title'));
+		return view('orders.index', compact('role', 'title', 'status'));
 	}
 
     /**
@@ -73,8 +76,8 @@ class OrdersController extends Controller {
         $credits = Auth::user()->customer->credit->credit_remaining;
         $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
 
-        if ($total == 0){
-            Session::flash('error_message', 'Total amount is zero.');
+        if ($total <= 0){
+            Session::flash('error_message', 'Total amount is equal to or less than zero.');
             return Redirect::back()->withInput(Input::all());
         } else {
             if ($total > $credits){
@@ -175,8 +178,8 @@ class OrdersController extends Controller {
         $credits = Auth::user()->customer->credit->credit_remaining;
         $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
 
-        if ($total == 0) {
-            Session::flash('error_message', 'Total amount is zero.');
+        if ($total <= 0){
+            Session::flash('error_message', 'Total amount is equal to or less than zero.');
             return Redirect::back()->withInput(Input::all());
         }  else {
             if ($total > $credits){

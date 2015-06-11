@@ -79,7 +79,7 @@
                     <tbody></tbody>
                 </table>
 
-                <div id="div_total_amount" class="panel panel-info">
+                <div id="div_total_amount" class="panel panel-default">
                     <div class="panel-heading">
                         <table>
                             <tr>
@@ -241,19 +241,15 @@
             });
 
             // Update of quantity
-            $tbl_cart.on('focusout', 'input.quantity', function(){
+            $tbl_cart.on('change', 'input.quantity', function(){
                 // Parse value to integer
                 var value = $(this).val();
                 value = isNaN(parseInt(value)) ? 0 : parseInt(value);
 
-                // Maintain max value
-                if (value > {{ Config::get('constants.MAX_QUANTITY') }}){
-                    value = {{ Config::get('constants.MAX_QUANTITY') }};
-                }
-
-                // Minimum quantity must be zero
-                if (value < 0){
-                    value = 0;
+                // Maintain max and min value
+                if (value > {{ Config::get('constants.MAX_QUANTITY') }} || value < 0){
+                    alert('Quantity must be between 0 and ' + {{ Config::get('constants.MAX_QUANTITY') }});
+                    return false;
                 }
 
                 // Update value

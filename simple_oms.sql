@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 09, 2015 at 12:05 PM
+-- Generation Time: Jun 11, 2015 at 09:39 AM
 -- Server version: 5.6.21
 -- PHP Version: 5.6.3
 
@@ -73,23 +73,21 @@ INSERT INTO `customers` (`id`, `first_name`, `middle_name`, `last_name`, `compan
 --
 
 CREATE TABLE IF NOT EXISTS `customer_credits` (
-  `id` int(10) unsigned NOT NULL,
   `customer_id` int(10) unsigned NOT NULL,
-  `credit_amount` decimal(9,2) unsigned NOT NULL,
   `credit_remaining` decimal(9,2) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `customer_credits`
 --
 
-INSERT INTO `customer_credits` (`id`, `customer_id`, `credit_amount`, `credit_remaining`, `created_at`, `updated_at`) VALUES
-(1, 7, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
-(2, 1, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
-(3, 2, '50000.00', '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
-(4, 8, '50000.00', '50000.00', '2015-06-03 06:13:15', '2015-06-03 06:13:15');
+INSERT INTO `customer_credits` (`customer_id`, `credit_remaining`, `created_at`, `updated_at`) VALUES
+(1, '34200.00', '2015-06-03 06:11:55', '2015-06-11 07:00:01'),
+(2, '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(7, '50000.00', '2015-06-03 06:11:55', '2015-06-03 06:11:55'),
+(8, '42975.00', '2015-06-03 06:13:15', '2015-06-11 06:59:30');
 
 -- --------------------------------------------------------
 
@@ -163,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pickup_date` date DEFAULT NULL,
   `po_number` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `updated_by` int(10) unsigned DEFAULT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `orders`
@@ -194,7 +192,11 @@ INSERT INTO `orders` (`id`, `customer_id`, `order_date`, `created_at`, `updated_
 (22, 1, '2016-01-14', '2015-06-08 09:41:43', '2015-06-08 09:41:43', '2016-01-21', 'NEWWORLDORDER', NULL),
 (23, 1, '2015-06-18', '2015-06-08 09:51:43', '2015-06-08 09:51:43', '2015-06-25', 'COKEPAMORE', NULL),
 (24, 1, '2015-07-03', '2015-06-09 02:39:09', '2015-06-09 02:39:09', '2015-07-10', 'YOWYOW', NULL),
-(25, 8, '2015-07-02', '2015-06-09 09:05:42', '2015-06-09 09:05:42', '2015-07-09', 'SCARORDER', NULL);
+(25, 8, '2015-07-02', '2015-06-09 09:05:42', '2015-06-09 09:05:42', '2015-07-09', 'SCARORDER', NULL),
+(26, 1, '2015-06-10', '2015-06-10 09:04:33', '2015-06-10 09:04:33', '2015-06-17', 'APPROVETHIS', NULL),
+(27, 1, '2015-06-11', '2015-06-11 01:45:51', '2015-06-11 01:45:51', '2015-06-18', 'POPAMORE', NULL),
+(28, 1, '2015-06-11', '2015-06-11 05:11:59', '2015-06-11 05:11:59', '2015-06-18', 'SOFTDRINKS', NULL),
+(29, 8, '2015-06-12', '2015-06-11 06:56:27', '2015-06-11 06:58:53', '2015-06-19', 'POASDSD123', 8);
 
 -- --------------------------------------------------------
 
@@ -227,10 +229,10 @@ INSERT INTO `order_details` (`order_id`, `product_id`, `quantity`, `created_at`,
 (6, 12, 2, '2015-06-02 09:26:09', '2015-06-02 09:26:09', '30.00'),
 (7, 2, 20, '2015-06-03 02:04:03', '2015-06-03 02:04:03', '28.00'),
 (7, 4, 50, '2015-06-03 02:04:03', '2015-06-03 02:04:03', '35.00'),
-(8, 1, 1000, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '25.00'),
-(8, 2, 20, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '28.00'),
-(8, 3, 25, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '20.00'),
-(8, 5, 45, '2015-06-03 07:09:37', '2015-06-03 07:09:37', '32.00'),
+(8, 1, 500, '2015-06-10 06:38:16', '2015-06-10 06:38:16', '25.00'),
+(8, 2, 20, '2015-06-10 06:38:16', '2015-06-10 06:38:16', '28.00'),
+(8, 3, 25, '2015-06-10 06:38:16', '2015-06-10 06:38:16', '20.00'),
+(8, 5, 45, '2015-06-10 06:38:16', '2015-06-10 06:38:16', '32.00'),
 (9, 2, 50000, '2015-06-03 07:16:56', '2015-06-03 07:16:56', '28.00'),
 (10, 6, 20, '2015-06-03 07:17:16', '2015-06-03 07:17:16', '25.00'),
 (10, 7, 65, '2015-06-03 07:17:16', '2015-06-03 07:17:16', '25.00'),
@@ -256,7 +258,12 @@ INSERT INTO `order_details` (`order_id`, `product_id`, `quantity`, `created_at`,
 (23, 6, 20, '2015-06-08 09:51:43', '2015-06-08 09:51:43', '25.00'),
 (24, 7, 20, '2015-06-09 02:39:09', '2015-06-09 02:39:09', '25.00'),
 (25, 1, 25, '2015-06-09 09:05:42', '2015-06-09 09:05:42', '25.00'),
-(25, 2, 50, '2015-06-09 09:05:42', '2015-06-09 09:05:42', '28.00');
+(25, 2, 50, '2015-06-09 09:05:42', '2015-06-09 09:05:42', '28.00'),
+(26, 8, 500, '2015-06-10 09:04:33', '2015-06-10 09:04:33', '26.00'),
+(27, 2, 100, '2015-06-11 01:45:51', '2015-06-11 01:45:51', '28.00'),
+(28, 6, 500, '2015-06-11 05:11:59', '2015-06-11 05:11:59', '25.00'),
+(28, 7, 100, '2015-06-11 05:12:00', '2015-06-11 05:12:00', '25.00'),
+(29, 6, 200, '2015-06-11 06:58:53', '2015-06-11 06:58:53', '25.00');
 
 -- --------------------------------------------------------
 
@@ -280,7 +287,6 @@ CREATE TABLE IF NOT EXISTS `order_order_status` (
 INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_at`, `updated_at`, `extra`) VALUES
 (1, 1, 1, '2015-06-02 06:53:13', '2015-06-02 06:53:13', NULL),
 (1, 2, 1, '2015-06-02 15:39:41', '2015-06-01 16:00:00', NULL),
-(1, 3, 1, '2015-06-02 15:59:59', '0000-00-00 00:00:00', NULL),
 (2, 1, 1, '2015-06-02 06:55:47', '2015-06-02 06:55:47', NULL),
 (2, 3, 1, '2015-06-03 02:30:44', '2015-06-03 02:30:44', NULL),
 (3, 1, 1, '2015-06-02 07:17:45', '2015-06-02 07:17:45', NULL),
@@ -294,6 +300,7 @@ INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_a
 (7, 1, 1, '2015-06-03 02:04:03', '2015-06-03 02:04:03', NULL),
 (7, 3, 1, '2015-06-03 02:30:48', '2015-06-03 02:30:48', NULL),
 (8, 1, 8, '2015-06-03 06:29:49', '2015-06-03 06:29:49', NULL),
+(8, 2, 9, '2015-06-11 01:44:32', '2015-06-11 01:44:32', ''),
 (9, 1, 7, '2015-06-03 07:16:56', '2015-06-03 07:16:56', NULL),
 (9, 3, 2, '2015-06-05 03:25:58', '2015-06-05 03:25:58', NULL),
 (10, 1, 7, '2015-06-03 07:17:16', '2015-06-03 07:17:16', NULL),
@@ -307,6 +314,7 @@ INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_a
 (14, 1, 1, '2015-06-05 02:56:50', '2015-06-05 02:56:50', NULL),
 (14, 3, 2, '2015-06-05 03:09:56', '2015-06-05 03:09:56', NULL),
 (15, 1, 8, '2015-06-05 03:00:59', '2015-06-05 03:00:59', NULL),
+(15, 2, 9, '2015-06-11 01:41:30', '2015-06-11 01:41:30', ''),
 (16, 1, 8, '2015-06-05 03:01:23', '2015-06-05 03:01:23', NULL),
 (16, 2, 9, '2015-06-05 03:21:53', '2015-06-05 03:21:53', NULL),
 (17, 1, 1, '2015-06-05 03:07:42', '2015-06-05 03:07:42', NULL),
@@ -325,7 +333,16 @@ INSERT INTO `order_order_status` (`order_id`, `status_id`, `user_id`, `created_a
 (23, 4, 1, '2015-06-09 05:12:00', '2015-06-09 05:12:00', 'I do not like coke anymore'),
 (24, 1, 1, '2015-06-09 02:39:09', '2015-06-09 02:39:09', NULL),
 (24, 2, 9, '2015-06-09 04:04:09', '2015-06-09 04:04:09', 'i really like the po number. do more of these. here''s a script for you. alert(''hello'')'),
-(25, 1, 8, '2015-06-09 09:05:42', '2015-06-09 09:05:42', NULL);
+(25, 1, 8, '2015-06-09 09:05:42', '2015-06-09 09:05:42', NULL),
+(25, 2, 9, '2015-06-10 06:36:22', '2015-06-10 06:36:22', 'This is approved for now.'),
+(26, 1, 1, '2015-06-10 09:04:33', '2015-06-10 09:04:33', NULL),
+(26, 2, 9, '2015-06-10 09:05:44', '2015-06-10 09:05:44', 'So many royals.'),
+(27, 1, 1, '2015-06-11 01:45:51', '2015-06-11 01:45:51', NULL),
+(27, 2, 9, '2015-06-11 01:49:52', '2015-06-11 01:49:52', ''),
+(28, 1, 1, '2015-06-11 05:12:00', '2015-06-11 05:12:00', NULL),
+(28, 3, 2, '2015-06-11 07:00:01', '2015-06-11 07:00:01', 'This is not approved because....'),
+(29, 1, 8, '2015-06-11 06:56:27', '2015-06-11 06:56:27', NULL),
+(29, 2, 2, '2015-06-11 06:59:30', '2015-06-11 06:59:30', '');
 
 -- --------------------------------------------------------
 
@@ -459,11 +476,11 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `remember_token`, `created_at`, `updated_at`, `role_id`, `customer_id`) VALUES
-(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'H5kVIfQZkQ2OPPYYcEJWJC2yWrnagNPk1SY3GzaZiIRXx8hgkdsuz61vTlk1', '2015-06-01 07:43:42', '2015-06-09 07:37:56', 1, 1),
-(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', '6RngOKrdAKG7NlZ9QDh4TVlP7Z5zEAY7gF5RnfKFbcLK1bwqI1VNFR2EWKCO', '2015-06-01 07:44:06', '2015-06-09 09:05:05', 3, 2),
+(1, 'Administrator', 'admin@admin.com', '$2y$10$jnKgGtdHBCk0yDCrrwIHRew9FEjksuOTYObbbJ0iB6d2jSr9ZeuTe', 'pXThsz7vRtE7IZXVyE7dFEFCY2KEk2hpu4vw6jZ3n1yNIrqCvddJ2fEP8GSt', '2015-06-01 07:43:42', '2015-06-11 06:54:48', 1, 1),
+(2, 'Approver', 'approver@approver.com', '$2y$10$WX7jaVy1DyOJlBfCLXsKKesvz.AmCV3.jmI9mL3I9BwMBfkXgw17K', 'DuZw5Ym5XgPHV9TVudWyB73ZQpRXZ0bWM53FhYxqlPHRtaNZ6EPVFlr4VlJn', '2015-06-01 07:44:06', '2015-06-11 05:32:46', 3, 2),
 (7, 'jennifer_law', 'jennifer@lawrence.com', '$2y$10$QFiydHgJQnFJINtM/dhCEuRLLfM50xf1KmfUFeMGKRRxNvpYOPz02', 'exgi7aHYish0mT7Rw31oOmPVzg5plxQWeJoDAui3qVcmwyLEVXcvhlxcdas9', '2015-06-03 06:11:55', '2015-06-05 06:34:10', 1, 7),
-(8, 'scarlette', 'scar@lette.com', '$2y$10$EZuV4ipFaQ81u1ecGuRjWOiUARjtXZnJGouGoVJSYQI3AMTjdOdGK', 'uUJx8b1kEOd7ZjMXrBAed0A23kkojzq9qsz5OwG0dDP0BKZhA5LWsbR5vXn8', '2015-06-03 06:13:15', '2015-06-09 09:06:04', 2, 8),
-(9, 'jem', 'jem@milton.com', '$2y$10$4u79ZNnxuv8kfdg4Ls2QLuzRJ8W8ZkVecBFra8cHWUYK4dPmgK58q', '1zAnS866vBkX4jV4MGRB4ViuLwW9H3csCeIZoFo6lyuka2xgrrv1cd4ePxWw', '2015-06-03 06:14:22', '2015-06-09 05:11:38', 3, 9);
+(8, 'scarlette', 'scar@lette.com', '$2y$10$EZuV4ipFaQ81u1ecGuRjWOiUARjtXZnJGouGoVJSYQI3AMTjdOdGK', 'iv3tKfRwwJWHxZnBBoryO0zoLv53NgqY51ljehefFoly8xQ8bHKotoRmpdFF', '2015-06-03 06:13:15', '2015-06-11 07:12:25', 2, 8),
+(9, 'jem', 'jem@milton.com', '$2y$10$4u79ZNnxuv8kfdg4Ls2QLuzRJ8W8ZkVecBFra8cHWUYK4dPmgK58q', 'LTB1Gqu5AtNz8HAxFUizGMVJk0a4bRUkwQFUZe3LmijLYaDWsaiCuVc7htQ6', '2015-06-03 06:14:22', '2015-06-11 05:20:44', 3, 9);
 
 -- --------------------------------------------------------
 
@@ -2777,7 +2794,7 @@ ALTER TABLE `customers`
 -- Indexes for table `customer_credits`
 --
 ALTER TABLE `customer_credits`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`customer_id`);
 
 --
 -- Indexes for table `orders`
@@ -2859,15 +2876,10 @@ ALTER TABLE `companies`
 ALTER TABLE `customers`
   MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
 --
--- AUTO_INCREMENT for table `customer_credits`
---
-ALTER TABLE `customer_credits`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
---
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;
+  MODIFY `id` int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=30;
 --
 -- AUTO_INCREMENT for table `order_status`
 --

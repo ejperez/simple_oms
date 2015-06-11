@@ -5,6 +5,7 @@ use SimpleOMS\Helpers\Helpers;
 use SimpleOMS\Order;
 use SimpleOMS\Http\Requests;
 use Datatables;
+use Input;
 use Auth;
 
 class DatatablesController extends Controller {
@@ -15,6 +16,9 @@ class DatatablesController extends Controller {
      */
     public function getOrders()
     {
+        // Filter orders by requested status
+        $requested_status = Input::get('status');
+
         //\DB::enableQueryLog();
 
         // Approvers can view orders from all customers
@@ -33,6 +37,18 @@ class DatatablesController extends Controller {
         $order_collection = new Collection();
 
         foreach ($orders as $order) {
+
+            // Get latest status of order
+            $latest_status = $order->status->sortByDesc('created_at')->first();
+
+            // Ensure that only orders with status matching requested status are returned
+            if (!empty($requested_status)){
+                if (array_search($latest_status->status->name, $requested_status) === FALSE){
+                    // Skip this order
+                    continue;
+                }
+            }
+
             // Get customer
             $customer = $order->customer;
 
@@ -57,9 +73,6 @@ class DatatablesController extends Controller {
                 $total += $detail->quantity * $detail->unit_price;
             }
 
-            // Latest status
-            $latest_status = $order->status->sortByDesc('created_at')->first();
-
             $order_collection->push([
                 'po_number' => $order->po_number,
                 'order_date' => $order->order_date,
@@ -69,6 +82,7 @@ class DatatablesController extends Controller {
                 'status' => $latest_status->status->name,
                 'user' => $latest_status->user->customer->fullName(),
                 'extra' => $latest_status->extra,
+                'change_status_date' => $latest_status->created_at,
                 'id' => Helpers::hash($order->id),
                 'credits' => $customer->credit->credit_remaining,
                 'details' => $order_details->toArray()
