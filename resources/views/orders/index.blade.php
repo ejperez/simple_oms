@@ -1,62 +1,61 @@
 @extends('app')
 
 @section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-9">
-            <table id="tbl_history" class="table table-condensed display" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th class="text">PO Number</th>
-                        <th class="date">Order Date</th>
-                        <th class="date">Pickup Date</th>
-                        <th class="text">Customer</th>
-                        <th class="number">Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                        <th class="status">Status</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Filters</h3>
-                </div>
-                <div class="panel-body" id="filters">
-                </div>
+<div class="row">
+    <div class="col-md-9">
+        <table id="tbl_history" class="table table-condensed display" cellspacing="0">
+            <thead>
+                <tr>
+                    <th class="text">PO Number</th>
+                    <th class="date">Created Date</th>
+                    <th class="date">Order Date</th>
+                    <th class="date">Pickup Date</th>
+                    <th class="text">Customer</th>
+                    <th class="number">Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                    <th class="status">Status</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Filters</h3>
+            </div>
+            <div class="panel-body" id="filters">
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal -->
 <div id="update_order_status_modal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Confirm Change of Order Status</h4>
-            </div>
-            <div class="modal-body">
-                {!! Form::open(['url' => '', 'name' => 'update_order_status_form', 'id' => 'update_order_status_form', 'method' => 'PUT']) !!}
-                <div class="row">
-                    <div class="col-md-12">
-                        <label>PO Number:</label>
-                        <label id="lbl_po_number" style="font-weight:bold"></label><br/>
-                        <label>Change status to:</label>
-                        <label id="lbl_status" style="font-weight:bold"></label><br/>
-                        <label for="reason">Optional message:</label>
-                        <textarea class="form-control" name="extra" id="extra" cols="30" rows="5"></textarea>
+            {!! Form::open(['url' => '', 'name' => 'update_order_status_form', 'id' => 'update_order_status_form', 'method' => 'PUT']) !!}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Confirm Change of Order Status</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>PO Number:</label>
+                            <label id="lbl_po_number" style="font-weight:bold"></label><br/>
+                            <label>Change status to:</label>
+                            <label id="lbl_status" style="font-weight:bold"></label><br/>
+                            <label id="lbl_extra" for="extra">Optional message:</label>
+                            <textarea class="form-control" name="extra" id="extra" cols="30" rows="5"></textarea>
+                        </div>
                     </div>
                 </div>
-
-                {!! Form::close() !!}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" id="btn_confirm">Confirm</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-default" id="btn_confirm" value="Confirm">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            {!! Form::close() !!}
         </div>
 
     </div>
@@ -96,32 +95,39 @@
             @{{/each}}
             </tbody>
         </table>
-        @{{#hasClass status 'Cancelled'}}
-        <div role="alert" class="alert alert-warning">
-            <p>Reason:<br/><strong>@{{ extra }}</strong></p>
+        <div role="alert" class="alert alert-default">
+            <p>Updated by:<br/><strong>@{{ updated_by }}</strong></p>
+            <p>Date:<br/><strong>@{{ updated_date }}</strong></p>
+            <p>Comment:<br/><em>@{{ update_remarks }}</em></p>
         </div>
-        @{{/hasClass}}
-        @{{#hasClass status 'Disapproved'}}
+        @{{#ifCond status '==' 'Cancelled'}}
+        <div role="alert" class="alert alert-warning">
+            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
+            <p>Reason:<br/><em>@{{ extra }}</em></p>
+        </div>
+        @{{/ifCond}}
+        @{{#ifCond status '==' 'Disapproved'}}
         <div role="alert" class="alert alert-danger">
             <p>Disapproved by:<br/><strong>@{{ user }}</strong></p>
-            <p>Date:<br/><strong>@{{ change_status_date.date }}</strong></p>
-            <p>Comment:<br/><strong>@{{ extra }}</strong></p>
+            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
+            <p>Comment:<br/><em>@{{ extra }}</em></p>
         </div>
-        @{{/hasClass}}
-        @{{#hasClass status 'Approved'}}
+        @{{/ifCond}}
+        @{{#ifCond status '==' 'Approved'}}
         <div role="alert" class="alert alert-success">
             <p>Approved by:<br/><strong>@{{ user }}</strong></p>
-            <p>Date:<br/><strong>@{{ change_status_date.date }}</strong></p>
-            <p>Comment:<br/><strong>@{{ extra }}</strong></p>
+            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
+            <p>Comment:<br/><em>@{{ extra }}</em></p>
         </div>
-        @{{/hasClass}}
-        @{{#hasClass status 'Pending'}}
+        @{{/ifCond}}
+        @{{#ifCond status '==' 'Pending'}}
         <table class="table">
             <caption><strong>Options</strong></caption>
             <tr>
                 <td>
                     @if ($role == 'Approver')
-                        <p><label>Customer Credits ({{ Config::get('constants.PESO_SYMBOL') }}) : </label> <strong>@{{ credits }}</strong></p>
+                        <p><label>Customer Credits ({{ Config::get('constants.PESO_SYMBOL') }}) : </label> <strong>@{{ credits_formatted }}</strong></p>
+                        <a class="btn btn-default" href="{{ url('orders') }}/@{{ id }}/edit/approver" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span> Edit</a>
                         <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-approve" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span> Approve</a>
                         <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-disapprove" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span> Disapprove</a>
                     @endif
@@ -133,7 +139,7 @@
                 </td>
             </tr>
         </table>
-        @{{/hasClass}}
+        @{{/ifCond}}
     </script>
 
     <script>
@@ -142,10 +148,13 @@
         var $tbl_history = $('#tbl_history'),
                 $update_order_status_form = $('form#update_order_status_form'),
 
+                $sel_status = null,
+
                 $update_order_status_modal = $('div#update_order_status_modal'),
-                $btn_confirm = $('button#btn_confirm'),
                 $lbl_status = $('label#lbl_status'),
                 $lbl_po_number = $('label#lbl_po_number'),
+                $lbl_extra = $('label#lbl_extra'),
+                $extra = $('#extra'),
 
                 dt_history = null,
                 base_dt_ajax = "{{ url('get-orders-datatable') }}";
@@ -156,12 +165,17 @@
                 processing: true,
                 serverSide: true,
                 displayLength: 10,
+                @if ($role == 'Approver')
+                    ajax: base_dt_ajax + '?status[]=Pending',
+                @else
+                    ajax: base_dt_ajax,
+                @endif
                 lengthChange: false,
                 searchDelay: 400,
-                ajax: base_dt_ajax,
                 scrollX: true,
                 columns: [
                     {data: "po_number"},
+                    {data: "created_date"},
                     {data: "order_date"},
                     {data: "pickup_date"},
                     {data: "customer"},
@@ -235,6 +249,12 @@
                             @foreach ($status as $value)
                                 var option = document.createElement("option");
                                 option.text = "{{ $value->name }}";
+                                @if ($role == 'Approver')
+                                    @if ($value->name == 'Pending')
+                                        // For approver, pending orders are displayed first
+                                        option.selected = true;
+                                    @endif
+                                @endif
                                 $input.append(option);
                             @endforeach
 
@@ -252,24 +272,20 @@
                                         dt_history.ajax.reload();
                                     });
 
+                            // Initialize drop down
                             $input.select2();
-
-                            @if ($role == 'Approver')
-                                // For approver, pending orders are displayed first
-                                $input.val(['Pending']).trigger('change');
-                            @endif
                         }
 
                         // Adjust input width
                         $input.addClass('form-control');
-                });
-            }
+                    });
+                }
             });
 
             // Add option buttons
             dt_history.on( 'draw.dt', function () {
                 // Format total amount
-                $('#tbl_history tbody td:nth-child(5)').each(function(){
+                $('#tbl_history tbody td:nth-child(6)').each(function(){
                     $(this).html( parseInt($(this).html()).format(2, 3, ',', '.') );
                     $(this).addClass('text-right');
                 });
@@ -279,7 +295,7 @@
             });
 
             // Add event listener for opening and closing details
-            $tbl_history.find('tbody').on('click', 'tr', function () {
+            $tbl_history.find('tbody').on('click', 'tr[id]', function () {
                 var tr = $(this).closest('tr');
                 var row = dt_history.row( tr );
 
@@ -289,11 +305,6 @@
                     tr.removeClass('shown');
                 }
                 else {
-                    if (row.data().status != 'Pending'){
-                        // Check if extra is not null
-                        row.data().extra = row.data().extra || 'No comment provided.';
-                    }
-
                     // Format unit price, price, credits
                     $.each(row.data().details, function(index, value){
                         row.data().details[index].unit_price = parseInt( value.unit_price ).format(2, 3, ',', '.');
@@ -301,11 +312,7 @@
                     });
 
                     // Format credits
-                    row.data().credits = parseInt( row.data().credits ).format(2, 3, ',', '.');
-
-                    // Format change status date
-                    var date = new Date( row.data().change_status_date.date );
-                    row.data().change_status_date.date = date.format('Y-m-d');
+                    row.data().credits_formatted = parseInt( row.data().credits ).format(2, 3, ',', '.');
 
                     // Open this row
                     row.child( template(row.data()) ).show();
@@ -322,18 +329,16 @@
                 // Update labels
                 $lbl_status.html($(this).attr('data-status'));
                 $lbl_po_number.html($(this).attr('data-po-number'));
-            });
 
-            // Confirm button
-            $btn_confirm.click(function(){
-                $update_order_status_form.submit();
+                // If disapproval/cancellation, require reason
+                if ($(this).attr('data-status') == 'Cancelled' || $(this).attr('data-status') == 'Disapproved'){
+                    $lbl_extra.html('Reason:').addClass('required');
+                    $extra.attr('required', 'required');
+                } else {
+                    $lbl_extra.html('Optional message:').removeClass('required');
+                    $extra.removeAttr('required');
+                }
             });
-
-            @if ($role == 'Approver')
-                // For approver, pending orders are displayed first
-                dt_history.ajax.url(base_dt_ajax + '?status[]=Pending');
-                dt_history.ajax.reload();
-            @endif
     });
 
     </script>

@@ -21,16 +21,16 @@ class DatatablesController extends Controller {
 
         //\DB::enableQueryLog();
 
-        // Approvers can view orders from all customers
-        // Administrators and Sales can only view their orders
+        // Approvers and Administrators can view orders from all customers
+        // Sales can only view their orders
 
         // Eager loading
-        if (Auth::user()->hasRole(['approver'])){
-            $orders = Order::with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer')
+        if (Auth::user()->hasRole(['approver', 'administrator'])){
+            $orders = Order::with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer', 'userUpdate.customer')
                 ->get();
         } else {
             $orders = Order::where('customer_id', '=', Auth::user()->customer->id)
-                ->with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer')
+                ->with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer', 'userUpdate.customer')
                 ->get();
         }
 
@@ -75,14 +75,18 @@ class DatatablesController extends Controller {
 
             $order_collection->push([
                 'po_number' => $order->po_number,
+                'created_date' => $order->created_at->format('Y-m-d'),
                 'order_date' => $order->order_date,
                 'pickup_date' => $order->pickup_date,
                 'customer' => $customer->fullName(),
                 'total_amount' => $total,
                 'status' => $latest_status->status->name,
                 'user' => $latest_status->user->customer->fullName(),
-                'extra' => $latest_status->extra,
-                'change_status_date' => $latest_status->created_at,
+                'extra' => is_null($latest_status->extra) ? 'No comments provided.' : htmlentities($latest_status->extra),
+                'updated_by' => is_null($order->userUpdate) ? null : $order->userUpdate->customer->fullName(),
+                'updated_date' => $order->updated_at->format('Y-m-d'),
+                'update_remarks' => is_null($order->update_remarks) ? 'No comments provided.' : htmlentities($order->update_remarks),
+                'change_status_date' => $latest_status->created_at->format('Y-m-d'),
                 'id' => Helpers::hash($order->id),
                 'credits' => $customer->credit->credit_remaining,
                 'details' => $order_details->toArray()
@@ -92,7 +96,7 @@ class DatatablesController extends Controller {
         //var_dump(\DB::getQueryLog());
 
         //dd($orders->toArray()[0]);
-        //dd($order_collection->toArray());
+        //dd($order_collection->toArray()[0]);
 
         return Datatables::of($order_collection)
             ->setRowId('id')

@@ -39,8 +39,6 @@ class RouteServiceProvider extends ServiceProvider {
             $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
             return \SimpleOMS\Product_Category::where('id', $hashids->decode($value))->first();
         });
-
-        //$router->model('category', 'SimpleOMS\Product_Category');
 	}
 
 	/**

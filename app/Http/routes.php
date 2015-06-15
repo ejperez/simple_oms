@@ -68,8 +68,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
     // update order
     Route::put('orders/{order}', 'OrdersController@update');
 
-    // update order status
-    // only cancelled state is allowed
+    // update order status, only cancelled status is allowed
     Route::put('orders/{order}/update-customer-status/{status}', 'OrdersController@updateStatus')
         ->where('status', 'Cancelled');
 
@@ -86,8 +85,13 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
  * Approver only
  */
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['approver']], function(){
-    // update order status
-    // only approved and disapproved state are allowed
+    // update order status, only approved and disapproved statuses are allowed
     Route::put('orders/{order}/update-approver-status/{status}', 'OrdersController@updateStatus')
         ->where('status', 'Approved|Disapproved');
+
+    // update order form
+    Route::get('orders/{order}/edit/approver', 'OrdersController@edit');
+
+    // update order
+    Route::put('orders/{order}/approver', 'OrdersController@update');
 });

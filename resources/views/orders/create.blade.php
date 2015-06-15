@@ -1,115 +1,129 @@
 @extends('app')
 
 @section('content')
-<div class="container">
-    @if (isset($order))
-        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id, 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
-        {!! Form::hidden('hash', $order->id) !!}
+
+@if (isset($order))
+    @if (isset($role) && $role == 'Approver')
+        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id.'/approver', 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
     @else
-        {!! Form::open(['url' => url('orders'), 'name' => 'order_form', 'id' => 'order_form']) !!}
+        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id, 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
     @endif
-    <div class="row">
-        <div class="col-md-3">
-            <fieldset>
-                <legend>Details</legend>
+    {!! Form::hidden('hash', $order->id) !!}
+@else
+    {!! Form::open(['url' => url('orders'), 'name' => 'order_form', 'id' => 'order_form']) !!}
+@endif
+<div class="row">
+    <div class="col-md-3">
+        <fieldset>
+            <legend>Details</legend>
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <label for="po_number" class="required">PO Number</label>
-                        {!! Form::text('po_number', Input::old('po_number'), [ 'id' => "po_number", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
-                    </div>
-                    <div class="col-md-12">
-                        <label for="order_date" class="required">Order Date</label>
-                        <div class="input-group date">
-                            {!! Form::text('order_date', Input::old('order_date'), [ 'id' => "order_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required" ]) !!}
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <label for="pickup_date" class="required">Pickup Date</label>
-                        <div class="input-group date">
-                            {!! Form::text('pickup_date', Input::old('pickup_date'), [ 'id' => "pickup_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required", 'readonly' => "readonly" ]) !!}
-                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                        </div>
-                    </div>
-                    <div class="col-md-3">&nbsp;</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="po_number" class="required">PO Number</label>
+                    {!! Form::text('po_number', Input::old('po_number'), [ 'id' => "po_number", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
                 </div>
-            </fieldset>
-        </div>
-        <div class="col-md-9">
-            <fieldset>
-                <legend>Items</legend>
-
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="category">Category</label>
-                                <select class="form-control"id="category">
-                                    <option value=""></option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="product">Product</label>
-                                <select class="form-control" id="product"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <br/>
-                                <a class="btn btn-default btn-md" id="btn_add_product"><span class="glyphicon glyphicon-plus"></span> Add</a>
-                                <a class="btn btn-default btn-md" id="btn_remove_product"><span class="glyphicon glyphicon-remove"></span> Remove</a>
-                            </div>
-                        </div>
+                <div class="col-md-12">
+                    <label for="order_date" class="required">Order Date</label>
+                    <div class="input-group date">
+                        {!! Form::text('order_date', Input::old('order_date'), [ 'id' => "order_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required" ]) !!}
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                     </div>
                 </div>
-
-                <table id="tbl_cart" class="display" cellspacing="0">
-                    <thead>
-                    <tr>
-                        <th>DESCRIPTION</th>
-                        <th>CATEGORY</th>
-                        <th>U/M</th>
-                        <th>UNIT PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                        <th>QUANTITY</th>
-                        <th>PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-                <div id="div_total_amount" class="panel panel-default">
-                    <div class="panel-heading">
-                        <table>
-                            <tr>
-                                <td width="80%"><label for="">Current Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                                <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
-                            </tr>
-                            <tr>
-                                <td><label for="">Total: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                                <td><label for="" id="lbl_total_amount"></label></td>
-                            </tr>
-                            <tr>
-                                <td><label for="">Remaining Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                                <td><label for="" id="lbl_rem_credits"></label></td>
-                            </tr>
-                        </table>
+                <div class="col-md-12">
+                    <label for="pickup_date" class="required">Pickup Date</label>
+                    <div class="input-group date">
+                        {!! Form::text('pickup_date', Input::old('pickup_date'), [ 'id' => "pickup_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required", 'readonly' => "readonly" ]) !!}
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                     </div>
                 </div>
-            </fieldset>
-        </div>
+                @if (isset($order))
+                    @if ($order->customer_id != Auth::user()->customer_id)
+                        <div class="col-md-12">
+                            <label>Customer</label>
+                            <input class="form-control" type="text" readonly value="{{ $customer->fullName() }}"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="required">Reason</label>
+                            <textarea class="form-control" name="extra" cols="30" rows="5" {{ Input::old('extra') }} required></textarea>
+                        </div>
+                    @endif
+                @endif
+            </div>
+        </fieldset>
     </div>
+    <div class="col-md-9">
+        <fieldset>
+            <legend>Items</legend>
 
-    <div class="row">
-        <div class="col-md-12 text-right">
-            <input class="btn btn-primary" type="submit" value="Submit"/>
-        </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="category">Category</label>
+                            <select class="form-control"id="category">
+                                <option value=""></option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="product">Product</label>
+                            <select class="form-control" id="product"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <br/>
+                            <a class="btn btn-default btn-md" id="btn_add_product"><span class="glyphicon glyphicon-plus"></span> Add</a>
+                            <a class="btn btn-default btn-md" id="btn_remove_product"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table id="tbl_cart" class="display" cellspacing="0">
+                <thead>
+                <tr>
+                    <th>DESCRIPTION</th>
+                    <th>CATEGORY</th>
+                    <th>U/M</th>
+                    <th>UNIT PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                    <th>QUANTITY</th>
+                    <th>PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="div_total_amount" class="panel panel-default">
+                <div class="panel-heading">
+                    <table>
+                        <tr>
+                            <td width="80%"><label for="">Current Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
+                            <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
+                        </tr>
+                        <tr>
+                            <td><label for="">Total: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
+                            <td><label for="" id="lbl_total_amount"></label></td>
+                        </tr>
+                        <tr>
+                            <td><label for="">Remaining Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
+                            <td><label for="" id="lbl_rem_credits"></label></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
     </div>
-
-    <input type="hidden" name="cart_table_data" id="cart_table_data" value="{{ Form::old('cart_table_data') }}"/>
-    {!! Form::close() !!}
 </div>
+
+<div class="row">
+    <div class="col-md-12 text-right">
+        <input class="btn btn-primary" type="submit" value="Submit"/>
+    </div>
+</div>
+
+<input type="hidden" name="cart_table_data" id="cart_table_data" value="{{ Form::old('cart_table_data') }}"/>
+{!! Form::close() !!}
 
 <script id="options-template"  type="text/x-handlebars-template">
     @{{#each products }}
@@ -249,6 +263,7 @@
                 // Maintain max and min value
                 if (value > {{ Config::get('constants.MAX_QUANTITY') }} || value < 0){
                     alert('Quantity must be between 0 and ' + {{ Config::get('constants.MAX_QUANTITY') }});
+                    $(this).val(0);
                     return false;
                 }
 

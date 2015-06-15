@@ -23,7 +23,7 @@ class OrdersController extends Controller {
 	 */
 	public function index()
 	{
-        // Get roles
+        // Get role
         $role = Auth::user()->role->name;
 
         // Get order status
@@ -123,6 +123,13 @@ class OrdersController extends Controller {
      */
     public function edit(Order $order)
     {
+        // Only pending orders can be edited
+        $current_status = $order->status()->orderBy('created_at', 'desc')->first()->status->name;
+        if ($current_status != 'Pending'){
+            Session::flash('error_message', "Unable to edit order. Current status is not pending ($current_status).");
+            return Redirect::back()->withInput(Input::all());
+        }
+
         // Get order items
         $details = $order->details;
 
@@ -152,15 +159,23 @@ class OrdersController extends Controller {
             $category->id = Helpers::hash($category->id);
         }
 
-        // Get remaining credit
-        $credit = Auth::user()->customer->credit->credit_remaining;
-
         // Hash id
         $order->id = Helpers::hash($order->id);
 
+        // Get role of current user
+        $role = Auth::user()->role->name;
+
         $title = 'Edit Order';
 
-        return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'title'));
+        // Get remaining credit of customer of order
+        if ($order->customer_id == Auth::user()->customer_id){
+            $credit = Auth::user()->customer->credit->credit_remaining;
+            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'title', 'role'));
+        } else {
+            $customer = Customer::find($order->customer_id);
+            $credit = $customer->credit->credit_remaining;
+            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'customer', 'credit', 'title', 'role'));
+        }
     }
 
     /***
@@ -175,15 +190,28 @@ class OrdersController extends Controller {
         $quantities = Input::get('quantity');
         $unit_prices = Input::get('unit_price');
 
-        $credits = Auth::user()->customer->credit->credit_remaining;
+        if ($order->customer_id == Auth::user()->customer_id){
+            $credit = Auth::user()->customer->credit->credit_remaining;
+        } else {
+            // Check if extra field is not empty, if edited by other user
+            if (trim(Input::get('extra')) == ''){
+                Session::flash('error_message', "Please provide reason for editing.");
+                return Redirect::back()->withInput(Input::all());
+            } else {
+                $order->update_remarks = strip_tags(Input::get('extra'));
+            }
+
+            $credit = Customer::find($order->customer_id)->credit->credit_remaining;
+        }
+
         $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
 
         if ($total <= 0){
             Session::flash('error_message', 'Total amount is equal to or less than zero.');
             return Redirect::back()->withInput(Input::all());
         }  else {
-            if ($total > $credits){
-                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
+            if ($total > $credit){
+                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credit).");
                 return Redirect::back()->withInput(Input::all());
             }
 
@@ -208,7 +236,11 @@ class OrdersController extends Controller {
 
             // Redirect to update order form
             Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was updated.');
-            return redirect('orders/'.Input::get('hash').'/edit');
+            if (Auth::user()->role->name == 'Approver'){
+                return redirect('orders/'.Input::get('hash').'/edit/approver');
+            } else {
+                return redirect('orders/'.Input::get('hash').'/edit');
+            }
         }
     }
 
@@ -239,6 +271,14 @@ class OrdersController extends Controller {
         if ($current_status != 'Pending'){
             Session::flash('error_message', "Unable to change order status. Current status is not pending ($current_status).");
             return Redirect::back()->withInput(Input::all());
+        }
+
+        // For disapproval/cancellation, check if extra is not empty
+        if ($status == 'Disapproved' || $status == 'Cancelled'){
+            if (trim(Input::get('extra')) == ''){
+                Session::flash('error_message', "Please provide reason for cancellation/disapproval.");
+                return Redirect::back()->withInput(Input::all());
+            }
         }
 
         // For approval, check if user credits is more than or equal to total amount

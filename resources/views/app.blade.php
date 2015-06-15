@@ -24,17 +24,19 @@
     @include('nav')
 
     @if (Auth::check())
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h3>{{ $title }}</h3>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ $title }}</h3>
+                </div>
             </div>
+            @include('alerts')
         </div>
-        @include('alerts')
-    </div>
     @endif
 
-	@yield('content')
+    <div class="container-fluid">
+	    @yield('content')
+    </div>
 
 	<!-- Scripts -->
     {!! Html::script(elixir('js/app.js')) !!}
