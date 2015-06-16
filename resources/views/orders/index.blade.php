@@ -2,32 +2,117 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-9">
-        <table id="tbl_history" class="table table-condensed display" cellspacing="0">
+    <div class="col-md-10">
+        <table id="tbl_history" class="table table-condensed table-striped" cellspacing="0">
             <thead>
                 <tr>
-                    <th class="text">PO Number</th>
-                    <th class="date">Created Date</th>
-                    <th class="date">Order Date</th>
-                    <th class="date">Pickup Date</th>
-                    <th class="text">Customer</th>
-                    <th class="number">Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                    <th class="status">Status</th>
+                    <th>PO Number
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Created Date
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Order Date
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Pickup Date
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Customer
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Total Amount ({{ Config::get('constants.PESO_SYMBOL') }})
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Status
+                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                    </th>
+                    <th>Options</th>
                 </tr>
             </thead>
+            <tfoot>
+                <tr>
+                    <th colspan="8">
+                        <p>
+                            {!! $orders->appends(['s' => Input::get('s'), 'd' => Input::get('d'), 'f' => Input::get('f'),])->render() !!}
+                            {{ 'Page '.$orders->currentPage().' of '.$orders->lastPage().' ('.$orders->total().' records)' }}
+                        </p>
+                    </th>
+                </tr>
+            </tfoot>
+            <tbody>
+            @foreach ($orders as $order)
+                <tr data-order-id="{{ $hashids->encode($order->id) }}" data-po-number="{{ $order->po_number }}">
+                    <td>{{ $order->po_number }}</td>
+                    <td>{{ $order->created_at }}</td>
+                    <td>{{ $order->order_date }}</td>
+                    <td>{{ $order->pickup_date }}</td>
+                    <td>{{ $order->customer }}</td>
+                    <td class="text-right">{{ $order->total_amount }}</td>
+                    <td>{{ $order->status }}</td>
+                    <td>
+                        @if ($order->status == 'Pending')
+                            @if ($role == 'Approver')
+                                <a href="{{ url('orders/'.$hashids->encode($order->id).'/edit/approver') }}" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
+                                <a data-toggle="modal" data-target="#update_order_status_modal" class="btn-approve" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span></a>
+                                <a data-toggle="modal" data-target="#update_order_status_modal" class="btn-disapprove" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span></a>
+                            @endif
+
+                            @if ($role == 'Sales' || $role == 'Administrator')
+                                <a href="{{ url('orders/'.$hashids->encode($order->id).'/edit') }}" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span></a>
+                                <a data-toggle="modal" data-target="#update_order_status_modal" class="btn-cancel" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span></a>
+                            @endif
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
         </table>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Filters</h3>
             </div>
-            <div class="panel-body" id="filters">
+            <div class="panel-body">
+                <label for="">PO Number</label><br/>
+                <input type="text" class="form-control" id="po_number" value="{{ isset($filters->po_number) ? $filters->po_number : '' }}"/>
+                <label for="">Created Date</label><br/>
+                <input type="text" class="form-control" id="created_at" value="{{ isset($filters->created_at) ? $filters->created_at : '' }}"/>
+                <label for="">Order Date</label><br/>
+                <input type="text" class="form-control" id="order_date" value="{{ isset($filters->order_date) ? $filters->order_date : '' }}"/>
+                <label for="">Pickup Date</label><br/>
+                <input type="text" class="form-control" id="pickup_date" value="{{ isset($filters->pickup_date) ? $filters->pickup_date : '' }}"/>
+                <label for="">Customer</label><br/>
+                <input type="text" class="form-control" id="customer" value="{{ isset($filters->customer) ? $filters->customer : '' }}"/>
+                <label for="">Status</label><br/>
+                <select name="" id="status" multiple class="form-control">
+                    @foreach ($status as $value)
+                        @if ($value->name == 'Pending')
+                            @if ($role == 'Approver' && !isset($filters)))
+                                <option selected>{{ $value->name }}</option>
+                            @else
+                                <option {{ isset($filters->status) && in_array($value->name, $filters->status) ? 'selected' : '' }}>{{ $value->name }}</option>
+                            @endif
+                        @else
+                            <option {{ isset($filters->status) && in_array($value->name, $filters->status) ? 'selected' : '' }}>{{ $value->name }}</option>
+                        @endif
+                    @endforeach
+                </select>
+                <br/>
+                <a href="" id="apply_filter">Apply filter</a>
+                <a href="{{ URL::action('OrdersController@index') }}" id="apply_filter">Clear filter</a>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Modal -->
 <div id="update_order_status_modal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
@@ -41,13 +126,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        <div class="col-md-3"><label>PO Number:</label></div>
+                        <div class="col-md-3"><label id="lbl_po_number" style="font-weight:bold"></label></div>
+                        <div class="col-md-3"><label>Change status to:</label></div>
+                        <div class="col-md-3"><label id="lbl_status" style="font-weight:bold"></label></div>
                         <div class="col-md-12">
-                            <label>PO Number:</label>
-                            <label id="lbl_po_number" style="font-weight:bold"></label><br/>
-                            <label>Change status to:</label>
-                            <label id="lbl_status" style="font-weight:bold"></label><br/>
                             <label id="lbl_extra" for="extra">Optional message:</label>
-                            <textarea class="form-control" name="extra" id="extra" cols="30" rows="5"></textarea>
+                            <textarea class="form-control" name="extra" id="extra" cols="30" rows="10"></textarea>
                         </div>
                     </div>
                 </div>
@@ -57,92 +142,95 @@
                 </div>
             {!! Form::close() !!}
         </div>
-
     </div>
 </div>
 
 @section('css')
     <style>
+        #tbl_history tr
+        {
+            cursor:pointer;
+        }
+        #tbl_history tbody tr:hover
+        {
+            outline:solid thin #0063dc;
+        }
+        #tbl_history thead tr
+        {
+            background:#f5f5f5;
+            border:solid thin #ddd;
+        }
+        #tbl_history thead span.glyphicon
+        {
+            font-size:0.75em;
+        }
         #tbl_history tr.shown td
         {
             background:#76b4ff !important;
+        }
+        .pagination{
+            margin:0;
         }
     </style>
 @endsection
 
 @section('js')
-    <script id="details-template" type="text/x-handlebars-template">
-        <table class="table">
-            <caption><strong>Order Items</strong></caption>
-            <thead>
-            <th>Product</th>
-            <th>Category</th>
-            <th>UOM</th>
-            <th>Unit Price ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-            <th>Quantity</th>
-            <th>Price ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-            </thead>
-            <tbody>
-            @{{#each details}}
-            <tr class="@{{#oddEven @index}}@{{/oddEven}}">
-                <td>@{{ product }}</td>
-                <td>@{{ category }}</td>
-                <td>@{{ uom }}</td>
-                <td class="text-right">@{{ unit_price }}</td>
-                <td class="text-right">@{{ quantity }}</td>
-                <td class="text-right">@{{ price }}</td>
-            </tr>
-            @{{/each}}
-            </tbody>
-        </table>
-        <div role="alert" class="alert alert-default">
-            <p>Updated by:<br/><strong>@{{ updated_by }}</strong></p>
-            <p>Date:<br/><strong>@{{ updated_date }}</strong></p>
-            <p>Comment:<br/><em>@{{ update_remarks }}</em></p>
-        </div>
-        @{{#ifCond status '==' 'Cancelled'}}
-        <div role="alert" class="alert alert-warning">
-            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
-            <p>Reason:<br/><em>@{{ extra }}</em></p>
-        </div>
-        @{{/ifCond}}
-        @{{#ifCond status '==' 'Disapproved'}}
-        <div role="alert" class="alert alert-danger">
-            <p>Disapproved by:<br/><strong>@{{ user }}</strong></p>
-            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
-            <p>Comment:<br/><em>@{{ extra }}</em></p>
-        </div>
-        @{{/ifCond}}
-        @{{#ifCond status '==' 'Approved'}}
-        <div role="alert" class="alert alert-success">
-            <p>Approved by:<br/><strong>@{{ user }}</strong></p>
-            <p>Date:<br/><strong>@{{ change_status_date }}</strong></p>
-            <p>Comment:<br/><em>@{{ extra }}</em></p>
-        </div>
-        @{{/ifCond}}
-        @{{#ifCond status '==' 'Pending'}}
-        <table class="table">
-            <caption><strong>Options</strong></caption>
-            <tr>
-                <td>
-                    @if ($role == 'Approver')
-                        <p><label>Customer Credits ({{ Config::get('constants.PESO_SYMBOL') }}) : </label> <strong>@{{ credits_formatted }}</strong></p>
-                        <a class="btn btn-default" href="{{ url('orders') }}/@{{ id }}/edit/approver" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-approve" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Approved" href="#" title="Approve"><span class="glyphicon glyphicon-ok"></span> Approve</a>
-                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-disapprove" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Disapproved" href="#" title="Disapprove"><span class="glyphicon glyphicon-remove"></span> Disapprove</a>
-                    @endif
-
-                    @if ($role == 'Sales' || $role == 'Administrator')
-                        <a class="btn btn-default" href="{{ url('orders') }}/@{{ id }}/edit" id="btn_edit" title="Edit"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-                        <a data-toggle="modal" data-target="#update_order_status_modal" class="btn btn-default btn-cancel" data-order-id="@{{ id }}" data-po-number="@{{ po_number }}" data-status="Cancelled" href="#" title="Cancel"><span class="glyphicon glyphicon-remove"></span> Cancel</a>
-                    @endif
-                </td>
-            </tr>
-        </table>
-        @{{/ifCond}}
-    </script>
-
     <script>
+        var base_url = document.location.href.split('?')[0],
+                $update_order_status_form = $('form#update_order_status_form'),
+                $apply_filter = $('#apply_filter'),
+                $lbl_status = $('label#lbl_status'),
+                $lbl_po_number = $('label#lbl_po_number'),
+                $lbl_extra = $('label#lbl_extra'),
+                $extra = $('#extra');
+
+        $(document).ready(function(){
+            // Initialize drop down
+            $('#status').select2();
+
+            // Initialize date pickers
+            $('#created_at, #order_date, #pickup_date').datepicker({
+                disableTouchKeyboard:   true,
+                format:                 '{{ Config::get('constants.DATE_FORMAT') }}'
+            }).on('changeDate', function(){
+                $(this).datepicker('hide');
+            });
+
+            // Apply filter link
+            $apply_filter.on('click', function(e){
+                var f = {
+                    po_number: $('#po_number').val(),
+                    created_at: $('#created_at').val(),
+                    order_date: $('#order_date').val(),
+                    pickup_date: $('#pickup_date').val(),
+                    customer: $('#customer').val(),
+                    status: $('#status').val()
+                }
+                var url = base_url + '?f=' + encodeURIComponent(JSON.stringify(f));
+                $(this).attr('href', url);
+            });
+
+            // Update status buttons click event
+            $('#tbl_history tbody tr').on('click', 'a.btn-approve, a.btn-disapprove, a.btn-cancel', function(){
+                // Update url of form
+                var url = '{{ url('orders')  }}/' + $(this).closest('tr').attr('data-order-id') + '/update-{{ Auth::user()->role->name == 'Approver' ? 'approver' : 'customer' }}-status/' + $(this).attr('data-status');
+                $update_order_status_form.attr('action', url);
+
+                // Update labels
+                $lbl_status.html($(this).attr('data-status'));
+                $lbl_po_number.html($(this).closest('tr').attr('data-po-number'));
+
+                // If disapproval/cancellation, require reason
+                if ($(this).attr('data-status') == 'Cancelled' || $(this).attr('data-status') == 'Disapproved'){
+                    $lbl_extra.html('Reason:').addClass('required');
+                    $extra.attr('required', 'required');
+                } else {
+                    $lbl_extra.html('Optional message:').removeClass('required');
+                    $extra.removeAttr('required');
+                }
+            });
+        });
+        /*
         var template = Handlebars.compile($("#details-template").html());
 
         var $tbl_history = $('#tbl_history'),
@@ -319,28 +407,11 @@
                     tr.addClass('shown');
                 }
             });
-
-            // Update status buttons click event
-            $tbl_history.on('click', 'a.btn-approve, a.btn-disapprove, a.btn-cancel', function(){
-                // Update url of form
-                var url = '{{ url('orders')  }}/' + $(this).attr('data-order-id') + '/update-{{ Auth::user()->hasRole('approver') ? 'approver' : 'customer' }}-status/' + $(this).attr('data-status');
-                $update_order_status_form.attr('action', url);
-
-                // Update labels
-                $lbl_status.html($(this).attr('data-status'));
-                $lbl_po_number.html($(this).attr('data-po-number'));
-
-                // If disapproval/cancellation, require reason
-                if ($(this).attr('data-status') == 'Cancelled' || $(this).attr('data-status') == 'Disapproved'){
-                    $lbl_extra.html('Reason:').addClass('required');
-                    $extra.attr('required', 'required');
-                } else {
-                    $lbl_extra.html('Optional message:').removeClass('required');
-                    $extra.removeAttr('required');
-                }
-            });
     });
-
+*/
     </script>
 @endsection('js')
+
+{{ var_dump(\DB::getQueryLog()) }}
+
 @endsection('content')

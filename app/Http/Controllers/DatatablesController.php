@@ -7,6 +7,7 @@ use SimpleOMS\Http\Requests;
 use Datatables;
 use Input;
 use Auth;
+use DB;
 
 class DatatablesController extends Controller {
 
@@ -19,20 +20,27 @@ class DatatablesController extends Controller {
         // Filter orders by requested status
         $requested_status = Input::get('status');
 
-        //\DB::enableQueryLog();
+        \DB::enableQueryLog();
 
         // Approvers and Administrators can view orders from all customers
         // Sales can only view their orders
-
         // Eager loading
         if (Auth::user()->hasRole(['approver', 'administrator'])){
-            $orders = Order::with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer', 'userUpdate.customer')
+            //$orders = Order::with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer', 'userUpdate.customer')
+            $orders = Order::with(['customer' => function($query){
+                $query->where('first_name', '=', '%El John%');
+            }])
+                ->take(15)
                 ->get();
         } else {
             $orders = Order::where('customer_id', '=', Auth::user()->customer->id)
                 ->with('customer', 'customer.credit', 'details', 'details.product', 'details.product.category', 'status', 'status.status', 'status.user', 'status.user.customer', 'userUpdate.customer')
                 ->get();
         }
+
+        var_dump(\DB::getQueryLog());
+
+        dd($orders->toArray());
 
         $order_collection = new Collection();
 
@@ -93,10 +101,10 @@ class DatatablesController extends Controller {
             ]);
         }
 
-        //var_dump(\DB::getQueryLog());
+        var_dump(\DB::getQueryLog());
 
         //dd($orders->toArray()[0]);
-        //dd($order_collection->toArray()[0]);
+        dd($order_collection->toArray()[0]);
 
         return Datatables::of($order_collection)
             ->setRowId('id')

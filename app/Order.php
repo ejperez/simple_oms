@@ -6,6 +6,8 @@ class Order extends Model {
 
     protected $fillable = ['customer_id', 'employee_id', 'order_date', 'required_date'];
 
+    // Relationships
+
     public function details()
     {
         return $this->hasMany('SimpleOMS\Order_Detail', 'order_id', 'id');
@@ -16,11 +18,6 @@ class Order extends Model {
         return $this->hasMany('SimpleOMS\Order_Order_Status', 'order_id', 'id');
     }
 
-    public function latestStatus()
-    {
-        return $this->hasMany('SimpleOMS\Order_Order_Status', 'order_id', 'id')->orderBy('created_at', 'desc')->first();
-    }
-
     public function customer()
     {
         return $this->belongsTo('SimpleOMS\Customer', 'customer_id', 'id');
@@ -29,5 +26,29 @@ class Order extends Model {
     public function userUpdate()
     {
         return $this->belongsTo('SimpleOMS\User', 'updated_by', 'id');
+    }
+
+    // Methods
+
+    /**
+     * Compute total amount of order
+     * @return int
+     */
+    public function totalAmount()
+    {
+        $total = 0;
+        foreach ($this->details as $detail){
+            $total += $detail->quantity * $detail->unit_price;
+        }
+        return $total;
+    }
+
+    /**
+     * Get current status of order
+     * @return mixed
+     */
+    public function latestStatus()
+    {
+        return $this->status->sortByDesc('created_at')->first()->status->name;
     }
 }

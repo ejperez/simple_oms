@@ -68,6 +68,6 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
 
     public function customer()
     {
-        return $this->hasOne('SimpleOMS\Customer', 'id', 'customer_id');
+        return $this->hasOne('SimpleOMS\Customer', 'id', 'id');
     }
 }

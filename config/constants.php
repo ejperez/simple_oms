@@ -11,11 +11,16 @@ return [
     'MAX_QUANTITY' => 500,
     'PESO_SYMBOL' => '₱',
     'PICKUP_DAYS_COUNT' => 7,
+
     // Date formats
     'DATE_FORMAT' => 'yyyy-mm-dd',
     'DATE_FORMAT_MYSQL_YMD' => '%Y-%m-%d',
     'DATE_FORMAT_PHP' => 'Y-m-d',
+
     // For hashing ids
     'SALT' => 'asdsdsd!@#$%^RTYUIfghjk#$%^&*',
     'HLEN' => 25,
+
+    // Pagination
+    'PER_PAGE' => 15,
 ];

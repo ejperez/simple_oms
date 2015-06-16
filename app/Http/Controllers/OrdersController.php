@@ -8,11 +8,14 @@ use SimpleOMS\Order_Status;
 use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
 use SimpleOMS\Helpers\Helpers;
+use Hashids\Hashids;
 use Datatables;
 use Redirect;
 use Session;
+use Config;
 use Input;
 use Auth;
+use DB;
 
 class OrdersController extends Controller {
 
@@ -23,15 +26,66 @@ class OrdersController extends Controller {
 	 */
 	public function index()
 	{
+        \DB::enableQueryLog();
+
+        // Get query parameters
+        $filters = json_decode(Input::get('f'));
+        $sort_column = Input::has('s') ? Input::get('s') : 'created_at';
+        $sort_direction = Input::has('d') ? Input::get('d') : 'desc';
+
+        // Query view
+        $orders = DB::table('orders_vw');
+
+        // Sales can only view his/her orders only
+        if (Auth::user()->role->name == 'Sales'){
+            $orders->where('customer', '=', Auth::user()->customer->fullName());
+        }
+
+        // Search parameters
+        if (isset($filters->po_number) && !empty($filters->po_number))
+            $orders->where('po_number', 'like', "%$filters->po_number%");
+
+        if (isset($filters->created_at) && !empty($filters->created_at))
+            $orders->where('created_at', '=', $filters->created_at);
+
+        if (isset($filters->order_date) && !empty($filters->order_date))
+            $orders->where('order_date', '=', $filters->order_date);
+
+        if (isset($filters->pickup_date) && !empty($filters->pickup_date))
+            $orders->where('pickup_date', 'like', $filters->pickup_date);
+
+        if (isset($filters->customer) && !empty($filters->customer))
+            $orders->where('customer', 'like', "%$filters->customer%");
+
+        // For approvers, pending orders are selected by default
+        if (Auth::user()->role->name == 'Approver'){
+            if (isset($filters->status) && !empty($filters->status)) {
+                $orders->whereIn('status', $filters->status);
+            } else if (!isset($filters)){
+                $orders->whereIn('status', ['Pending']);
+            }
+        } else {
+            if (isset($filters->status) && !empty($filters->status)) {
+                $orders->whereIn('status', $filters->status);
+            }
+        }
+
+        // Sorting
+        $orders = $orders->orderBy($sort_column, $sort_direction)
+            ->paginate(Config::get('constants.PER_PAGE'));
+
         // Get role
         $role = Auth::user()->role->name;
 
         // Get order status
         $status = Order_Status::all();
 
+        // Encryption
+        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+
         $title = 'List of Orders';
 
-		return view('orders.index', compact('role', 'title', 'status'));
+		return view('orders.index', compact('orders', 'role', 'title', 'status', 'hashids', 'filters'));
 	}
 
     /**
