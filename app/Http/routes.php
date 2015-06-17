@@ -28,12 +28,9 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
     // order history
     Route::get('orders', 'OrdersController@index');
 
-    // Datatables content requests
-    Route::get('get-orders-datatable', 'DatatablesController@getOrders');
-
     // AJAX requests
-    Route::get('search-address', 'AJAXController@searchAddress');
     Route::get('search-products-by-category/{category}', 'AJAXController@searchProductByCategory');
+    Route::get('get-order-details/{order}', 'AJAXController@getOrderDetails');
 });
 
 /*

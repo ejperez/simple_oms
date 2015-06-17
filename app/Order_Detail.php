@@ -10,4 +10,9 @@ class Order_Detail extends Model {
     {
         return $this->hasOne('SimpleOMS\Product', 'id', 'product_id');
     }
+
+    public function getPrice()
+    {
+        return number_format($this->quantity * $this->unit_price, 2);
+    }
 }

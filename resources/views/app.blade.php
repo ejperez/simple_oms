@@ -19,6 +19,34 @@
     {!! Html::style(elixir('css/app.css')) !!}
     <!-- Custom CSS for page -->
     @yield('css')
+    <style>
+        .table-selectable tr {
+            cursor:pointer;
+        }
+        .table-selectable tbody tr:hover {
+            outline:solid thin #0063dc;
+        }
+        .table-selectable tbody tr.selected {
+            background:#0088cc;
+            outline:none;
+        }
+        .table-selectable tbody tr.selected td:not(.input){
+            color: #fff;
+        }
+        .table-selectable thead tr {
+            background:#f5f5f5;
+            border:solid thin #ddd;
+        }
+        .table-selectable thead span.glyphicon {
+            font-size:0.75em;
+        }
+        .table-selectable tr.shown td {
+            background:#76b4ff !important;
+        }
+        .pagination{
+            margin:0;
+        }
+    </style>
 </head>
 <body>
     @include('nav')

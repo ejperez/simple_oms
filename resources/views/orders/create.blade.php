@@ -4,115 +4,126 @@
 
 @if (isset($order))
     @if (isset($role) && $role == 'Approver')
-        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id.'/approver', 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
+        {!! Form::model($order, ['url' =>  url('orders').'/'.SimpleOMS\Helpers\Helpers::hash($order->id).'/approver', 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
     @else
-        {!! Form::model($order, ['url' =>  url('orders').'/'.$order->id, 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
+        {!! Form::model($order, ['url' =>  url('orders').'/'.SimpleOMS\Helpers\Helpers::hash($order->id), 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
     @endif
-    {!! Form::hidden('hash', $order->id) !!}
+    {!! Form::hidden('hash', SimpleOMS\Helpers\Helpers::hash($order->id)) !!}
 @else
     {!! Form::open(['url' => url('orders'), 'name' => 'order_form', 'id' => 'order_form']) !!}
 @endif
 <div class="row">
     <div class="col-md-3">
-        <fieldset>
-            <legend>Details</legend>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <label for="po_number" class="required">PO Number</label>
-                    {!! Form::text('po_number', Input::old('po_number'), [ 'id' => "po_number", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
-                </div>
-                <div class="col-md-12">
-                    <label for="order_date" class="required">Order Date</label>
-                    <div class="input-group date">
-                        {!! Form::text('order_date', Input::old('order_date'), [ 'id' => "order_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required" ]) !!}
-                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <label for="pickup_date" class="required">Pickup Date</label>
-                    <div class="input-group date">
-                        {!! Form::text('pickup_date', Input::old('pickup_date'), [ 'id' => "pickup_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required", 'readonly' => "readonly" ]) !!}
-                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
-                    </div>
-                </div>
-                @if (isset($order))
-                    @if ($order->customer_id != Auth::user()->customer_id)
-                        <div class="col-md-12">
-                            <label>Customer</label>
-                            <input class="form-control" type="text" readonly value="{{ $customer->fullName() }}"/>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="required">Reason</label>
-                            <textarea class="form-control" name="extra" cols="30" rows="5" {{ Input::old('extra') }} required></textarea>
-                        </div>
-                    @endif
-                @endif
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Order</h3>
             </div>
-        </fieldset>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="po_number" class="required">PO Number</label>
+                        {!! Form::text('po_number', Input::old('po_number'), [ 'id' => "po_number", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
+                    </div>
+                    <div class="col-md-12">
+                        <label for="order_date" class="required">Order Date</label>
+                        <div class="input-group date">
+                            {!! Form::text('order_date', Input::old('order_date'), [ 'id' => "order_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required" ]) !!}
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="pickup_date" class="required">Pickup Date</label>
+                        <div class="input-group date">
+                            {!! Form::text('pickup_date', Input::old('pickup_date'), [ 'id' => "pickup_date", 'class' => "form-control", 'maxlength' => "10", 'required' => "required", 'readonly' => "readonly" ]) !!}
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                        </div>
+                    </div>
+                    @if (isset($order))
+                        @if ($order->customer_id != Auth::user()->id)
+                            <div class="col-md-12">
+                                <label>Customer</label>
+                                <input class="form-control" type="text" readonly value="{{ $customer->fullName() }}"/>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="required">Reason</label>
+                                <textarea class="form-control" name="extra" cols="30" rows="5" {{ Input::old('extra') }} required></textarea>
+                            </div>
+                        @else
+                            <div class="col-md-12">
+                                <label>Reason</label>
+                                <textarea class="form-control" name="extra" cols="30" rows="5" {{ Input::old('extra') }}></textarea>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
     <div class="col-md-9">
-        <fieldset>
-            <legend>Items</legend>
-
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="category">Category</label>
-                            <select class="form-control"id="category">
-                                <option value=""></option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="product">Product</label>
-                            <select class="form-control" id="product"></select>
-                        </div>
-                        <div class="col-md-4">
-                            <br/>
-                            <a class="btn btn-default btn-md" id="btn_add_product"><span class="glyphicon glyphicon-plus"></span> Add</a>
-                            <a class="btn btn-default btn-md" id="btn_remove_product"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Items</h3>
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="category">Category</label>
+                                <select class="form-control"id="category">
+                                    <option value=""></option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ SimpleOMS\Helpers\Helpers::hash($category->id) }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="product">Product</label>
+                                <select class="form-control" id="product"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <br/>
+                                <a class="btn btn-default btn-md" id="btn_add_product"><span class="glyphicon glyphicon-plus"></span> Add</a>
+                                <a class="btn btn-default btn-md" id="btn_remove_product"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <table id="tbl_cart" class="display" cellspacing="0">
-                <thead>
-                <tr>
-                    <th>DESCRIPTION</th>
-                    <th>CATEGORY</th>
-                    <th>U/M</th>
-                    <th>UNIT PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                    <th>QUANTITY</th>
-                    <th>PRICE ({{ Config::get('constants.PESO_SYMBOL') }})</th>
-                </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+                <table id="tbl_cart" class="table table-condensed table-striped table-selectable" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>DESCRIPTION</th>
+                        <th>CATEGORY</th>
+                        <th>U/M</th>
+                        <th>UNIT PRICE ({{ PESO_SYMBOL }})</th>
+                        <th>QUANTITY</th>
+                        <th>PRICE ({{ PESO_SYMBOL }})</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
 
-            <div id="div_total_amount" class="panel panel-default">
-                <div class="panel-heading">
-                    <table>
-                        <tr>
-                            <td width="80%"><label for="">Current Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                            <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
-                        </tr>
-                        <tr>
-                            <td><label for="">Total: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                            <td><label for="" id="lbl_total_amount"></label></td>
-                        </tr>
-                        <tr>
-                            <td><label for="">Remaining Credits: {{ Config::get('constants.PESO_SYMBOL') }}</label></td>
-                            <td><label for="" id="lbl_rem_credits"></label></td>
-                        </tr>
-                    </table>
+                <div id="div_total_amount" class="panel panel-default">
+                    <div class="panel-heading">
+                        <table>
+                            <tr>
+                                <td width="80%"><label for="">Current Credits: {{ PESO_SYMBOL }}</label></td>
+                                <td width="20%"><label for="" id="lbl_curr_credits"></label></td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Total: {{ PESO_SYMBOL }}</label></td>
+                                <td><label for="" id="lbl_total_amount"></label></td>
+                            </tr>
+                            <tr>
+                                <td><label for="">Remaining Credits: {{ PESO_SYMBOL }}</label></td>
+                                <td><label for="" id="lbl_rem_credits"></label></td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </fieldset>
+        </div>
     </div>
 </div>
 
@@ -138,22 +149,18 @@
         <td>@{{ category }}</td>
         <td>@{{ uom }}</td>
         <td>@{{ unit_price }}</td>
-        <td>
+        <td class="input">
             <input data-unit-price="@{{ unit_price }}" data-id="@{{ id }}" type="number" name="quantity[]" class="quantity" value="@{{ quantity }}"/>
             <input type="hidden" name="product[]" value="@{{ id }}"/>
             <input type="hidden" name="unit_price[]" value="@{{ unit_price }}"/>
         </td>
-        <td class="price">0.00</td>
+        <td class="price text-right">0.00</td>
     </tr>
     @{{/each }}
 </script>
 
     @section('js')
     <script>
-        // Handlebars templates
-        var options_template = Handlebars.compile($("#options-template").html()),
-                cart_row_template = Handlebars.compile($("#cart-row-template").html());
-        
         var dt_cart = null,
                 products_data = {},
                 cart_data = {},
@@ -178,29 +185,26 @@
                 $lbl_curr_credits = $('label#lbl_curr_credits'),
                 $lbl_rem_credits = $('label#lbl_rem_credits'),
 
-                $order_form = $('form#order_form');
+                $order_form = $('form#order_form'),
+
+                // Handlebars templates
+                options_template = Handlebars.compile($("#options-template").html()),
+                cart_row_template = Handlebars.compile($("#cart-row-template").html());
 
         $(document).ready(function(){
             // Initialize datepicker, set minimum date to today
             $order_date.datepicker({
                 startDate:              "0d",
                 disableTouchKeyboard:   true,
-                format:                 '{{ Config::get('constants.DATE_FORMAT') }}'
+                format:                 '{{ DATE_FORMAT }}'
             }).on('change', function(){
                 var pickup_date = new Date($(this).val());
-                pickup_date = pickup_date.addDays({{ Config::get('constants.PICKUP_DAYS_COUNT') }});
-                $pickup_date.val(pickup_date.format('{{ Config::get('constants.DATE_FORMAT_PHP') }}'));
+                pickup_date = pickup_date.addDays({{ PICKUP_DAYS_COUNT }});
+                $pickup_date.val(pickup_date.format('{{ DATE_FORMAT_PHP }}'));
             });
 
             // Initialize products select
             $product.select2();
-
-            // Initialize cart datatable
-            dt_cart = $tbl_cart.DataTable({
-                scrollX: true,
-                paging: false,
-                searching: false
-            });
 
             // Changing of category
             $category.on('change', function(){
@@ -261,8 +265,8 @@
                 value = isNaN(parseInt(value)) ? 0 : parseInt(value);
 
                 // Maintain max and min value
-                if (value > {{ Config::get('constants.MAX_QUANTITY') }} || value < 0){
-                    alert('Quantity must be between 0 and ' + {{ Config::get('constants.MAX_QUANTITY') }});
+                if (value > {{ MAX_QUANTITY }} || value < 0){
+                    alert('Quantity must be between 0 and ' + {{ MAX_QUANTITY }});
                     $(this).val(0);
                     return false;
                 }
@@ -276,14 +280,20 @@
                 computeAndDisplayTotal();
             });
 
+            // To prevent firing click event of row
+            $tbl_cart.on('click', 'input.quantity', function(e){
+                e.stopPropagation();
+            })
+
             // Highlight product selected by user
-            $tbl_cart.on( 'click', 'tbody tr', function () {
+            $tbl_cart.on( 'click', 'tbody tr', function (e) {
                 if ( $(this).hasClass('selected') ) {
                     $(this).removeClass('selected');
                 }
                 else {
                     $(this).addClass('selected');
                 }
+                $(this).children('input.quantity').toggle();
             });
 
             // Delete product click event
@@ -314,7 +324,6 @@
             @endif
 
             drawCartTable();
-            computeAndDisplayTotal();
         });
 
         // Display cart items to table
@@ -327,6 +336,7 @@
             });
 
             $tbl_cart.find('tbody').html(cart_row_template({items: items}));
+            computeAndDisplayTotal();
         }
 
         function computeAndDisplayTotal()
@@ -343,7 +353,7 @@
                 // Add to grand total
                 total += price;
 
-                $price.html(price.toFixed(2));
+                $price.html(price.toMoney());
             });
 
             // Compute remaining credits
@@ -355,9 +365,9 @@
                 $lbl_rem_credits.removeAttr('style');
             }
 
-            $lbl_total_amount.html(total.toFixed(2));
-            $lbl_curr_credits.html(curr_credit.toFixed(2));
-            $lbl_rem_credits.html(rem_credit.toFixed(2));
+            $lbl_total_amount.html(total.toMoney());
+            $lbl_curr_credits.html(curr_credit.toMoney());
+            $lbl_rem_credits.html(rem_credit.toMoney());
         }
     </script>
     @endsection('js')

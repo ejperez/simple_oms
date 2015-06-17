@@ -1,7 +1,6 @@
 <?php namespace SimpleOMS\Helpers;
 
 use Hashids\Hashids;
-use Config;
 
 final class Helpers{
 
@@ -13,7 +12,7 @@ final class Helpers{
     public static function hash($value)
     {
         if (is_numeric($value)){
-            $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+            $hashids = new Hashids(SALT ,HLEN);
             return $hashids->encode($value);
         } else {
             return false;
@@ -31,7 +30,7 @@ final class Helpers{
             return false;
         } else {
 
-            $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
+            $hashids = new Hashids(SALT, HLEN);
             return $hashids->decode($value);
         }
     }

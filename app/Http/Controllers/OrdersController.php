@@ -7,12 +7,9 @@ use SimpleOMS\Order_Detail;
 use SimpleOMS\Order_Status;
 use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
-use SimpleOMS\Helpers\Helpers;
-use Hashids\Hashids;
 use Datatables;
 use Redirect;
 use Session;
-use Config;
 use Input;
 use Auth;
 use DB;
@@ -72,7 +69,7 @@ class OrdersController extends Controller {
 
         // Sorting
         $orders = $orders->orderBy($sort_column, $sort_direction)
-            ->paginate(Config::get('constants.PER_PAGE'));
+            ->paginate(PER_PAGE);
 
         // Get role
         $role = Auth::user()->role->name;
@@ -80,12 +77,9 @@ class OrdersController extends Controller {
         // Get order status
         $status = Order_Status::all();
 
-        // Encryption
-        $hashids = new Hashids(Config::get('constants.SALT'), Config::get('constants.HLEN'));
-
         $title = 'List of Orders';
 
-		return view('orders.index', compact('orders', 'role', 'title', 'status', 'hashids', 'filters'));
+		return view('orders.index', compact('orders', 'role', 'title', 'status', 'filters'));
 	}
 
     /**
@@ -100,11 +94,6 @@ class OrdersController extends Controller {
 
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
-
-        // Hash categories
-        foreach ($categories as $key => $category){
-            $category->id = Helpers::hash($category->id);
-        }
 
         // Get remaining credit
         $credit = Auth::user()->customer->credit->credit_remaining;
@@ -208,21 +197,13 @@ class OrdersController extends Controller {
         // Get categories
         $categories = Product_Category::orderBy('name')->get();
 
-        // Hash categories
-        foreach ($categories as $key => $category){
-            $category->id = Helpers::hash($category->id);
-        }
-
-        // Hash id
-        $order->id = Helpers::hash($order->id);
-
         // Get role of current user
         $role = Auth::user()->role->name;
 
         $title = 'Edit Order';
 
         // Get remaining credit of customer of order
-        if ($order->customer_id == Auth::user()->customer_id){
+        if ($order->customer_id == Auth::user()->id){
             $credit = Auth::user()->customer->credit->credit_remaining;
             return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'title', 'role'));
         } else {
@@ -244,17 +225,14 @@ class OrdersController extends Controller {
         $quantities = Input::get('quantity');
         $unit_prices = Input::get('unit_price');
 
-        if ($order->customer_id == Auth::user()->customer_id){
+        if ($order->customer_id == Auth::user()->id){
             $credit = Auth::user()->customer->credit->credit_remaining;
         } else {
             // Check if extra field is not empty, if edited by other user
             if (trim(Input::get('extra')) == ''){
                 Session::flash('error_message', "Please provide reason for editing.");
                 return Redirect::back()->withInput(Input::all());
-            } else {
-                $order->update_remarks = strip_tags(Input::get('extra'));
             }
-
             $credit = Customer::find($order->customer_id)->credit->credit_remaining;
         }
 
@@ -273,6 +251,7 @@ class OrdersController extends Controller {
             $order->order_date   = Input::get('order_date');
             $order->pickup_date  = Input::get('pickup_date');
             $order->updated_by   = Auth::user()->id;
+            $order->update_remarks = strip_tags(Input::get('extra'));
             $order->update();
 
             // Delete related order details

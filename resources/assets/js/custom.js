@@ -18,6 +18,11 @@ Number.prototype.format = function(n, x, s, c) {
     return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
 };
 
+// To money format
+Number.prototype.toMoney = function(){
+    return this.format(2, 3, ',', '.');
+}
+
 // Add days to JS date
 Date.prototype.addDays = function(days)
 {
@@ -42,6 +47,8 @@ Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
     switch (operator) {
         case '==':
             return (v1 == v2) ? options.fn(this) : options.inverse(this);
+        case '!=':
+            return (v1 != v2) ? options.fn(this) : options.inverse(this);
         case '===':
             return (v1 === v2) ? options.fn(this) : options.inverse(this);
         case '<':

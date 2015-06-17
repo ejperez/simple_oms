@@ -40,7 +40,7 @@ class Order extends Model {
         foreach ($this->details as $detail){
             $total += $detail->quantity * $detail->unit_price;
         }
-        return $total;
+        return number_format($total,2);
     }
 
     /**
@@ -49,6 +49,6 @@ class Order extends Model {
      */
     public function latestStatus()
     {
-        return $this->status->sortByDesc('created_at')->first()->status->name;
+        return $this->status->sortByDesc('created_at')->first();
     }
 }
