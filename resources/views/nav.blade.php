@@ -14,26 +14,26 @@
             <ul class="nav navbar-nav">
                 <li><a href="{{ url('/') }}">Home</a></li>
                 @if (Auth::check())
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Orders <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="{{ url('orders') }}">View Orders</a></li>
-                        @if (Auth::user()->hasRole(['administrator', 'sales']))
-                        <li class="divider"></li>
-                        <li><a href="{{ url('orders/create') }}">Create Order</a></li>
-                        @endif
-                    </ul>
-                </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Orders <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{ url('orders') }}">View Orders</a></li>
+                            @if (Auth::user()->hasRole(['administrator', 'sales']))
+                            <li class="divider"></li>
+                            <li><a href="{{ url('orders/create') }}">Create Order</a></li>
+                            @endif
+                        </ul>
+                    </li>
                 @if (Auth::user()->hasRole(['administrator']))
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Users <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="{{ url('users') }}">View Users</a></li>
-                        <li class="divider"></li>
-                        <li><a href="{{ url('auth/register') }}">Register User</a></li>
-                    </ul>
-                </li>
-                <li><a href="{{ url('/') }}">Audit Log</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" role="button">Users <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="{{ url('users') }}">View Users</a></li>
+                            <li class="divider"></li>
+                            <li><a href="{{ url('users/create') }}">Create User</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ url('/') }}">Audit Log</a></li>
                 @endif
                 @endif
             </ul>
@@ -60,7 +60,7 @@
                             </a>
                         </li>
                         <li class="divider"></li>
-                        <li><a href="{{ url('/') }}">Edit Account</a></li>
+                        <li><a href="{{ url('/users/'.SimpleOMS\Helpers\Helpers::hash(Auth::user()->id)).'/edit' }}">Edit Account</a></li>
                         <li class="divider"></li>
                         <li><a href="{{ url('/auth/logout') }}">Logout</a></li>
                     </ul>

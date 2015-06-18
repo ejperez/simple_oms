@@ -22,3 +22,6 @@ define('HLEN' , 25);
 
 // Pagination
 define('PER_PAGE' , 15);
+
+// User registration
+define('DEFAULT_PW', 'password');

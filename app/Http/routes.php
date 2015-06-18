@@ -31,6 +31,12 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
     // AJAX requests
     Route::get('search-products-by-category/{category}', 'AJAXController@searchProductByCategory');
     Route::get('get-order-details/{order}', 'AJAXController@getOrderDetails');
+
+    // edit user form
+    Route::get('users/{user}/edit', 'UsersController@edit');
+
+    // update user action
+    Route::put('users/{user}', 'UsersController@update');
 });
 
 /*
@@ -41,9 +47,11 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator']], 
         return 'Users';
     });
 
-    Route::get('customers', function(){
-        return 'Customers';
-    });
+    // create user form
+    Route::get('users/create', 'UsersController@create');
+
+    // store user action
+    Route::post('users', 'UsersController@store');
 });
 
 /*
@@ -68,14 +76,6 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['sales', 'administr
     // update order status, only cancelled status is allowed
     Route::put('orders/{order}/update-customer-status/{status}', 'OrdersController@updateStatus')
         ->where('status', 'Cancelled');
-
-    /** CUSTOMERS **/
-
-    // create customer form
-    Route::get('customers/create', 'CustomersController@create');
-
-    // create customer
-    Route::post('customers','CustomersController@store');
 });
 
 /*

@@ -1,8 +1,8 @@
 <?php namespace SimpleOMS\Providers;
 
-use Hashids\Hashids;
-use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Routing\Router;
+use SimpleOMS\Helpers\Helpers;
 
 class RouteServiceProvider extends ServiceProvider {
 
@@ -28,14 +28,17 @@ class RouteServiceProvider extends ServiceProvider {
         // Model bindings
         $router->bind('order', function($value)
         {
-            $hashids = new Hashids(SALT, HLEN);
-            return \SimpleOMS\Order::where('id', $hashids->decode($value))->first();
+            return \SimpleOMS\Order::where('id', Helpers::unhash($value))->first();
         });
 
         $router->bind('category', function($value)
         {
-            $hashids = new Hashids(SALT, HLEN);
-            return \SimpleOMS\Product_Category::where('id', $hashids->decode($value))->first();
+            return \SimpleOMS\Product_Category::where('id', Helpers::unhash($value))->first();
+        });
+
+        $router->bind('user', function($value)
+        {
+            return \SimpleOMS\User::where('id', Helpers::unhash($value))->first();
         });
 	}
 

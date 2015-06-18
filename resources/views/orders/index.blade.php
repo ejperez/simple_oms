@@ -7,42 +7,45 @@
             <thead>
                 <tr>
                     <th>PO Number
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'po_number', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Created Date
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'created_at', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Order Date
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'order_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Pickup Date
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'pickup_date', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Customer
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'customer', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Total Amount ({{ PESO_SYMBOL }})
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'total_amount', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                     <th>Status
-                        <a title="Ascending sort" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Descending sort" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="Sort ascending" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                        <a title="Sort descending" href="{{ URL::action('OrdersController@index', ['s' => 'status', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
                     </th>
                 </tr>
             </thead>
             <tfoot>
                 <tr>
-                    <th colspan="8">
-                        <p>
-                            {!! $orders->appends(['s' => Input::get('s'), 'd' => Input::get('d'), 'f' => Input::get('f'),])->render() !!}
-                            {{ 'Page '.$orders->currentPage().' of '.$orders->lastPage().' ('.$orders->total().' records)' }}
-                        </p>
+                    <th colspan="7" class="text-right">
+                        {!! $orders->appends(['s' => Input::get('s'), 'd' => Input::get('d'), 'f' => Input::get('f'),])->render() !!}
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="7" class="text-right">
+                        {{ 'Shown: '.(count($orders)) }}
+                        {{ 'Total: '.$orders->total() }}
                     </th>
                 </tr>
             </tfoot>
@@ -197,6 +200,8 @@
                 </div>
             </div>
 
+            <br/>
+
             @{{#ifCond status '==' 'Cancelled'}}
             <div role="alert" class="alert alert-warning">
                 <p>Reason:<br/><strong>@{{ extra }}</strong></p>
@@ -327,7 +332,5 @@
         }
     </script>
 @endsection('js')
-
-{{ var_dump(\DB::getQueryLog()) }}
 
 @endsection('content')
