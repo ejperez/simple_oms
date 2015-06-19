@@ -31,6 +31,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
     // AJAX requests
     Route::get('search-products-by-category/{category}', 'AJAXController@searchProductByCategory');
     Route::get('get-order-details/{order}', 'AJAXController@getOrderDetails');
+    Route::get('get-user-order-count-status/{user}', 'AJAXController@getUserOrderCountStatus');
 
     // edit user form
     Route::get('users/{user}/edit', 'UsersController@edit');
@@ -43,9 +44,8 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
  * Administrator only
  */
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator']], function(){
-    Route::get('users', function(){
-        return 'Users';
-    });
+    // List of users
+    Route::get('users', 'UsersController@index');
 
     // create user form
     Route::get('users/create', 'UsersController@create');

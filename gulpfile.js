@@ -36,6 +36,7 @@ elixir(function(mix) {
 		'vendor/datatables/media/js/jquery.dataTables.min.js',
 		'vendor/handlebars/handlebars.min.js',		
 		'vendor/select2/dist/js/select2.min.js',
+		'vendor/chart/chart.js',
 		'js/custom.js',
 	], 'public/js/app.js', 'resources/assets');
 

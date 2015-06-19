@@ -3,6 +3,8 @@
 use SimpleOMS\Product_Category;
 use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
+use SimpleOMS\User;
+use DB;
 
 class AJAXController extends Controller {
 
@@ -11,6 +13,20 @@ class AJAXController extends Controller {
         $category->products;
         return json_encode($category);
 	}
+
+    public function getUserOrderCountStatus(User $user)
+    {
+        $data = DB::table('orders_vw')
+            ->where('customer_id', '=', $user->id)
+            ->groupBy('status')
+            ->select([
+                'status as label',
+                DB::raw('count(*) as value')
+            ])
+            ->get();
+
+        return json_encode($data);
+    }
 
     public function getOrderDetails(Order $order)
     {
@@ -49,21 +65,5 @@ class AJAXController extends Controller {
             'extra' => $latest_status->extra,
             'total' => $order->totalAmount(),
         ]);
-    }
-
-    public function searchAddress()
-    {
-        $term = Input::get('term');
-        if(!empty($term)){
-            $term = '%'.$term.'%'; // Enclose in wildcards
-            $zipcodes = \SimpleOMS\Zipcode::where('major_area', 'like', $term)
-                ->where('city', 'like', $term, 'OR')
-                ->where('zip_code', 'like', $term, 'OR')
-                ->get();
-
-            return json_encode($zipcodes);
-        } else {
-            abort(404);
-        }
     }
 }

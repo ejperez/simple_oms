@@ -2,11 +2,20 @@
 
 @section('content')
 <div class="row">
-	<div class="col-md-8">
+	<div class="col-md-4">
 		<div class="panel panel-default">
-			<div class="panel-heading">Monthly Order Transactions</div>
+			<div class="panel-heading">Order Count by Status</div>
 			<div class="panel-body">
-                <img src="https://www.syncfusion.com/content/en-US/Products/Images/aspnetmvc/ejchart/ChartPie.png?v=03042015101404" alt="Pie chart"/>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div id="canvas-holder">
+                            <canvas id="orders-count-by-status-chart-area" width="300" height="300"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="chart"></div>
+                    </div>
+                </div>
 			</div>
 		</div>
 	</div>
@@ -34,4 +43,60 @@
         </div>
     </div>
 </div>
-@endsection
+
+@section('js')
+    <script id="legends-template" type="text/x-handlebars-template">
+        <ul>
+            @{{#each dataset}}
+                <li style="color:@{{ color }}">@{{ label }}</li>
+            @{{/each  }}
+        </ul>
+    </script>
+
+    <script>
+        var legends = Handlebars.compile($("#legends-template").html());
+
+        var colors = {
+            Pending:        '#A8B3C5',
+            Cancelled:      '#FFC870',
+            Approved:       '#5AD3D1',
+            Disapproved:    '#FF5A5E'
+        };
+
+        $(document).ready(function(){
+            $.get('get-user-order-count-status/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
+                var ctr = 0,
+                        total = 0,
+                        dataset = JSON.parse(data);
+
+                $.each(dataset, function(index, item){
+                    total += item.value;
+                    dataset[index]['color'] = colors[item.label];
+                    ctr++;
+                });
+
+                var ctx = document.getElementById("orders-count-by-status-chart-area").getContext("2d");
+
+                console.log(dataset);
+
+                window.myPie = new Chart(ctx).Pie(dataset, {
+                    legendTemplate : legends({
+                        dataset: dataset,
+                        total: total
+                    }),
+                    percentageInnerCutout: 50
+                });
+
+                //then you just need to generate the legend
+                var legend = window.myPie.generateLegend();
+
+                //and append it to your page somewhere
+                $('#chart').append(legend);
+            }).fail(function(){
+                alert('Failed to get details.');
+            });
+        });
+    </script>
+@endsection('js')
+
+@endsection('content')
