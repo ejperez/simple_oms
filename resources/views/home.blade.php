@@ -7,38 +7,28 @@
 			<div class="panel-heading">Order Count by Status</div>
 			<div class="panel-body">
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-12">
                         <div id="canvas-holder">
-                            <canvas id="orders-count-by-status-chart-area" width="300" height="300"/>
+                            <canvas id="orders-count-by-status-chart-area" width="385" height="300"/>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div id="chart"></div>
+                    <div class="col-md-12">
+                        <div id="legend"></div>
                     </div>
                 </div>
 			</div>
 		</div>
 	</div>
-    <div class="col-md-4">
+    <div class="col-md-8">
         <div class="panel panel-default">
-            <div class="panel-heading">Details</div>
+            <div class="panel-heading">Pending Orders</div>
             <div class="panel-body">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Count</th>
-                        <th>Total Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>January</td>
-                            <td>22</td>
-                            <td>₱ 20000.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="col-md-6" id="near-expiration-orders">
+
+                </div>
+                <div class="col-md-6" id="expired-orders">
+
+                </div>
             </div>
         </div>
     </div>
@@ -46,20 +36,47 @@
 
 @section('js')
     <script id="legends-template" type="text/x-handlebars-template">
-        <ul>
-            @{{#each dataset}}
-                <li style="color:@{{ color }}">@{{ label }}</li>
-            @{{/each  }}
-        </ul>
+        @{{#each dataset}}
+        <div class="row">
+            <div class="col-md-3" style="color:@{{ color }}"><strong>@{{ label }}</strong></div>
+            <div class="col-md-9">@{{ count }}</div>
+        </div>
+        @{{/each  }}
+        <div class="row">
+            <div class="col-md-3"><strong>Total</strong></div>
+            <div class="col-md-9">@{{ total }}</div>
+        </div>
+    </script>
+
+    <script id="orders-list-template" type="text/x-handlebars-template">
+        <h5>@{{ title }}</h5>
+        <table class="table">
+            <thead>
+                <th>PO Number</th>
+                <th>Order Date</th>
+                <th>@{{ days_label }}</th>
+            </thead>
+            <tbody>
+                @{{#each dataset}}
+                <tr>
+                    <td>@{{ po_number }}</td>
+                    <td>@{{ order_date }}</td>
+                    <td>@{{ days }}</td>
+                </tr>
+                @{{/each  }}
+            </tbody>
+        </table>
+
     </script>
 
     <script>
-        var legends = Handlebars.compile($("#legends-template").html());
+        var legends = Handlebars.compile($("#legends-template").html()),
+                orders_list = Handlebars.compile($("#orders-list-template").html());
 
         var colors = {
-            Pending:        '#A8B3C5',
-            Cancelled:      '#FFC870',
-            Approved:       '#5AD3D1',
+            Pending:        '#5DA5DA',
+            Cancelled:      '#FAA43A',
+            Approved:       '#60BD68',
             Disapproved:    '#FF5A5E'
         };
 
@@ -70,28 +87,44 @@
                         dataset = JSON.parse(data);
 
                 $.each(dataset, function(index, item){
-                    total += item.value;
                     dataset[index]['color'] = colors[item.label];
                     ctr++;
                 });
 
                 var ctx = document.getElementById("orders-count-by-status-chart-area").getContext("2d");
 
-                console.log(dataset);
-
                 window.myPie = new Chart(ctx).Pie(dataset, {
                     legendTemplate : legends({
                         dataset: dataset,
-                        total: total
+                        total: dataset[0].total
                     }),
-                    percentageInnerCutout: 50
+                    percentageInnerCutout: 50,
+                    tooltipTemplate: "<%= label %>: <%= value %>%"
                 });
 
                 //then you just need to generate the legend
                 var legend = window.myPie.generateLegend();
 
                 //and append it to your page somewhere
-                $('#chart').append(legend);
+                $('#legend').append(legend);
+            }).fail(function(){
+                alert('Failed to get details.');
+            });
+
+            $.get('get-user-order-pending-count/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
+                data = JSON.parse(data);
+
+                $("#near-expiration-orders").html(orders_list({
+                    dataset: data.near_expired,
+                    title: 'Top ' + data.limit + ' Orders Near Expiration',
+                    days_label: 'Days Left'
+                }));
+
+                $("#expired-orders").html(orders_list({
+                    dataset: data.expired,
+                    title: 'Top Expired ' + data.limit + ' Orders',
+                    days_label: 'Days Passed'
+                }));
             }).fail(function(){
                 alert('Failed to get details.');
             });

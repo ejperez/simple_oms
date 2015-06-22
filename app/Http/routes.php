@@ -32,6 +32,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator', 's
     Route::get('search-products-by-category/{category}', 'AJAXController@searchProductByCategory');
     Route::get('get-order-details/{order}', 'AJAXController@getOrderDetails');
     Route::get('get-user-order-count-status/{user}', 'AJAXController@getUserOrderCountStatus');
+    Route::get('get-user-order-pending-count/{user}', 'AJAXController@getUserOrderPendingCount');
 
     // edit user form
     Route::get('users/{user}/edit', 'UsersController@edit');

@@ -14,16 +14,49 @@ class AJAXController extends Controller {
         return json_encode($category);
 	}
 
-    public function getUserOrderCountStatus(User $user)
+    public function getUserOrderPendingCount(User $user)
     {
         $data = DB::table('orders_vw')
             ->where('customer_id', '=', $user->id)
-            ->groupBy('status')
+            ->where('status', '=', 'Pending', 'AND')
             ->select([
-                'status as label',
-                DB::raw('count(*) as value')
+                'po_number',
+                'order_date',
+                DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
             ])
+            ->orderBy('days', 'asc')
             ->get();
+
+        // Segregate nearly expired orders from expired pending orders
+        // Limit orders fetched to save performance
+        $near_expiration = [];
+        $expired = [];
+        $limit = 10;
+
+        foreach ($data as $item){
+            if ($item->days < 0){
+                if (count($expired) < $limit){
+                    // Use absolute value of days
+                    $item->days = abs($item->days);
+                    $expired[] = $item;
+                }
+            } else {
+                if (count($near_expiration) < $limit) {
+                    $near_expiration[] = $item;
+                }
+            }
+        }
+
+        return json_encode([
+            'near_expired' => $near_expiration,
+            'expired' => $expired,
+            'limit' => $limit
+        ]);
+    }
+
+    public function getUserOrderCountStatus(User $user)
+    {
+        $data = DB::select(DB::raw('SELECT ov.status as label, COUNT(0) AS count, COUNT(0) AS total, ROUND((COUNT(0) / t.cnt * 100), 2) AS value, t.cnt AS total FROM orders_vw ov CROSS JOIN (SELECT COUNT(*) AS cnt FROM orders_vw WHERE customer_id = ?) t WHERE customer_id = ? GROUP BY ov.status'), [$user->id, $user->id]);
 
         return json_encode($data);
     }
