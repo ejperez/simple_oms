@@ -2,14 +2,14 @@
 
 use SimpleOMS\Http\Requests;
 use SimpleOMS\Helpers\Helpers;
-use SimpleOMS\Customer;
-use SimpleOMS\Customer_Credit;
 use SimpleOMS\User;
 use SimpleOMS\Role;
 use Redirect;
+use Illuminate\Http\Request;
+use SimpleOMS\Commands\CreateUser;
+use SimpleOMS\Commands\UpdateUser;
 use Session;
 use Input;
-use Hash;
 use Auth;
 use DB;
 
@@ -61,7 +61,7 @@ class UsersController extends Controller
      * Show create user form
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Request $request)
     {
         // Get list of roles
         $roles = Role::all();
@@ -78,39 +78,17 @@ class UsersController extends Controller
      */
     public function store(Requests\StoreUserRequest $request)
     {
-        $user = new User();
-        $user->fill([
-            'name' => Input::get('name'),
-            'email' => Input::get('email'),
-            'password' => Hash::make(DEFAULT_PW),
-            'role_id' => Input::get('role_id')
+        $response = $this->dispatchFrom(CreateUser::class, $request, [
+            'company_id' => Auth::user()->customer->company_id
         ]);
-        // Save user profile
-        $user->save();
 
-        // Save customer profile
-        $customer = new Customer();
-        $customer->fill([
-            'id' => $user->id,
-            'first_name' => Input::get('customer')['first_name'],
-            'middle_name' => Input::get('customer')['middle_name'],
-            'last_name' => Input::get('customer')['last_name'],
-            'company_id' => Auth::user()->customer->company_id,
-        ]);
-        $customer->save();
-
-        // Create credit record for administrator and sales roles
-        if ($user->hasRole(['administrator', 'sales'])){
-            $credit = new Customer_Credit();
-            $credit->fill([
-                'customer_id' => $user->id,
-                'credit_remaining' => DEFAULT_CREDIT
-            ]);
-            $credit->save();
+        if ($response instanceof User){
+            Session::flash('success', 'User "'.$response->name.'" was registered successfully.');
+            return redirect('users/create');
+        } else {
+            Session::flash('error_message', $response);
+            return Redirect::back()->withInput(Input::all());
         }
-
-        Session::flash('success', 'User "'.$user->name.'" was registered successfully.');
-        return redirect('users/create');
     }
 
     /**
@@ -135,34 +113,16 @@ class UsersController extends Controller
      */
     public function update(Requests\StoreUserRequest $request, User $user)
     {
-        // Check if password is correct
-        if (!Hash::check(Input::get('current_password'), $user->password))
-        {
-            Session::flash('error_message', "Wrong password.");
+        $response = $this->dispatchFrom(UpdateUser::class, $request, [
+            'user' => $user
+        ]);
+
+        if ($response instanceof User){
+            Session::flash('success', 'User "'.$response->name.'" was updated successfully.');
+            return redirect('users/'.Input::get('hash').'/edit');
+        } else {
+            Session::flash('error_message', $response);
             return Redirect::back()->withInput(Input::all());
         }
-
-        // Get customer record
-        $customer = $user->customer;
-
-        // Check if user wants to change password
-        $password = Input::get('password') != '' ? Input::get('password') : Input::get('current_password');
-
-        $user->fill([
-            'name' => Input::get('name'),
-            'email' => Input::get('email'),
-            'password' => Hash::make($password)
-        ]);
-        $user->update();
-
-        $customer->fill([
-            'first_name' => Input::get('customer')['first_name'],
-            'middle_name' => Input::get('customer')['middle_name'],
-            'last_name' => Input::get('customer')['last_name']
-        ]);
-        $customer->update();
-
-        Session::flash('success', 'User "'.$user->name.'" was updated successfully.');
-        return redirect('users/'.Input::get('hash').'/edit');
     }
 }

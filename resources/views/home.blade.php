@@ -38,19 +38,27 @@
     <script id="legends-template" type="text/x-handlebars-template">
         @{{#each dataset}}
         <div class="row">
-            <div class="col-md-3" style="color:@{{ color }}"><strong>@{{ label }}</strong></div>
-            <div class="col-md-9">@{{ count }}</div>
+            <div class="col-md-3" style="color:@{{ color }}">
+                <strong>@{{ label }}</strong>
+            </div>
+            <div class="col-md-9">
+                <input class="text-right" style="width:100%;border:none" type="text" readonly value="@{{ count }}"/>
+            </div>
         </div>
         @{{/each  }}
         <div class="row">
-            <div class="col-md-3"><strong>Total</strong></div>
-            <div class="col-md-9">@{{ total }}</div>
+            <div class="col-md-3">
+                <strong>Total</strong>
+            </div>
+            <div class="col-md-9">
+                <input class="text-right" style="width:100%;font-weight:bold;border:none" type="text" readonly value="@{{ total }}"/>
+            </div>
         </div>
     </script>
 
     <script id="orders-list-template" type="text/x-handlebars-template">
         <h5>@{{ title }}</h5>
-        <table class="table">
+        <table class="table table-condensed table-striped">
             <thead>
                 <th>PO Number</th>
                 <th>Order Date</th>
@@ -63,10 +71,13 @@
                     <td>@{{ order_date }}</td>
                     <td>@{{ days }}</td>
                 </tr>
+                @{{ else }}
+                <tr>
+                    <td colspan="3">No data to display.</td>
+                </tr>
                 @{{/each  }}
             </tbody>
         </table>
-
     </script>
 
     <script>
@@ -83,30 +94,33 @@
         $(document).ready(function(){
             $.get('get-user-order-count-status/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
                 var ctr = 0,
-                        total = 0,
                         dataset = JSON.parse(data);
 
-                $.each(dataset, function(index, item){
-                    dataset[index]['color'] = colors[item.label];
-                    ctr++;
-                });
+                if (dataset.length > 0){
+                    $.each(dataset, function(index, item){
+                        dataset[index]['color'] = colors[item.label];
+                        ctr++;
+                    });
 
-                var ctx = document.getElementById("orders-count-by-status-chart-area").getContext("2d");
+                    var ctx = document.getElementById("orders-count-by-status-chart-area").getContext("2d");
 
-                window.myPie = new Chart(ctx).Pie(dataset, {
-                    legendTemplate : legends({
-                        dataset: dataset,
-                        total: dataset[0].total
-                    }),
-                    percentageInnerCutout: 50,
-                    tooltipTemplate: "<%= label %>: <%= value %>%"
-                });
+                    window.myPie = new Chart(ctx).Pie(dataset, {
+                        legendTemplate : legends({
+                            dataset: dataset,
+                            total: dataset[0].total
+                        }),
+                        percentageInnerCutout: 50,
+                        tooltipTemplate: "<%= label %>: <%= value %>%"
+                    });
 
-                //then you just need to generate the legend
-                var legend = window.myPie.generateLegend();
+                    //then you just need to generate the legend
+                    var legend = window.myPie.generateLegend();
 
-                //and append it to your page somewhere
-                $('#legend').append(legend);
+                    //and append it to your page somewhere
+                    $('#legend').append(legend);
+                } else {
+                    $('#legend').html('No data to display.');
+                }
             }).fail(function(){
                 alert('Failed to get details.');
             });

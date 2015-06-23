@@ -200,5 +200,4 @@ return [
         'Datatables'      => 'yajra\Datatables\Datatables',
         'Hashids' => 'Vinkla\Hashids\Facades\Hashids',
 	],
-
 ];

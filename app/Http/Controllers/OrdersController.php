@@ -3,10 +3,11 @@
 use SimpleOMS\Customer;
 use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
-use SimpleOMS\Order_Detail;
 use SimpleOMS\Order_Status;
-use SimpleOMS\Order_Order_Status;
 use SimpleOMS\Product_Category;
+use SimpleOMS\Commands\CreateOrder;
+use SimpleOMS\Commands\UpdateOrder;
+use SimpleOMS\Commands\UpdateOrderStatus;
 use Datatables;
 use Redirect;
 use Session;
@@ -110,52 +111,16 @@ class OrdersController extends Controller {
     //public function storeOrder(Requests\StoreOrderRequest $request)
     public function store(Requests\StoreOrderRequest $request)
     {
-        // Compute total amount
-        // Order with total amount of zero must not proceed
-        $products = Input::get('product');
-        $quantities = Input::get('quantity');
-        $unit_prices = Input::get('unit_price');
+        $response = $this->dispatchFrom(CreateOrder::class, $request, [
+            'user' => Auth::user()
+        ]);
 
-        $credits = Auth::user()->customer->credit->credit_remaining;
-        $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
-
-        if ($total <= 0){
-            Session::flash('error_message', 'Total amount is equal to or less than zero.');
-            return Redirect::back()->withInput(Input::all());
-        } else {
-            if ($total > $credits){
-                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
-                return Redirect::back()->withInput(Input::all());
-            }
-
-            // Save to database
-            $order               = new Order();
-            $order->po_number    = Input::get('po_number');
-            $order->customer_id   = Auth::user()->customer->id;
-            $order->order_date   = Input::get('order_date');
-            $order->pickup_date  = Input::get('pickup_date');
-            $order->save();
-
-            // Save order details
-            foreach ($products as $key=>$product) {
-                $order_details = new Order_Detail();
-                $order_details->order_id = $order->id;
-                $order_details->product_id = $product;
-                $order_details->quantity = $quantities[$key];
-                $order_details->unit_price = $unit_prices[$key];
-                $order_details->save();
-            }
-
-            // Save status
-            Order_Order_Status::create([
-                'order_id' => $order->id,
-                'status_id' => Order_Status::where('name', 'like', 'Pending')->first()->id,
-                'user_id' => Auth::user()->id
-            ]);
-
-            // Redirect to create order form
-            Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was created.');
+        if ($response instanceof Order){
+            Session::flash('success', 'Order with PO Number "'.$response->po_number.'" was created.');
             return redirect('orders/create');
+        } else {
+            Session::flash('error_message', $response);
+            return Redirect::back()->withInput(Input::all());
         }
     }
 
@@ -221,130 +186,34 @@ class OrdersController extends Controller {
      */
     public function update(Requests\StoreOrderRequest $request, Order $order)
     {
-        $products = Input::get('product');
-        $quantities = Input::get('quantity');
-        $unit_prices = Input::get('unit_price');
+        $response = $this->dispatchFrom(UpdateOrder::class, $request, [
+            'user'  => Auth::user(),
+            'order' => $order
+        ]);
 
-        if ($order->customer_id == Auth::user()->id){
-            $credit = Auth::user()->customer->credit->credit_remaining;
-        } else {
-            // Check if extra field is not empty, if edited by other user
-            if (trim(Input::get('extra')) == ''){
-                Session::flash('error_message', "Please provide reason for editing.");
-                return Redirect::back()->withInput(Input::all());
-            }
-            $credit = Customer::find($order->customer_id)->credit->credit_remaining;
-        }
-
-        $total = $this->computeTotalAmount($products, $quantities, $unit_prices);
-
-        if ($total <= 0){
-            Session::flash('error_message', 'Total amount is equal to or less than zero.');
-            return Redirect::back()->withInput(Input::all());
-        }  else {
-            if ($total > $credit){
-                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credit).");
-                return Redirect::back()->withInput(Input::all());
-            }
-
-            $order->po_number    = Input::get('po_number');
-            $order->order_date   = Input::get('order_date');
-            $order->pickup_date  = Input::get('pickup_date');
-            $order->updated_by   = Auth::user()->id;
-            $order->update_remarks = strip_tags(Input::get('extra'));
-            $order->update();
-
-            // Delete related order details
-            Order_Detail::where('order_id', '=', $order->id)->delete();
-
-            // Save order details
-            foreach ($products as $key=>$product) {
-                $order_details = new Order_Detail();
-                $order_details->order_id = $order->id;
-                $order_details->product_id = $product;
-                $order_details->quantity = $quantities[$key];
-                $order_details->unit_price = $unit_prices[$key];
-                $order_details->save();
-            }
-
-            // Redirect to update order form
+        if ($response instanceof Order){
             Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was updated.');
             if (Auth::user()->role->name == 'Approver'){
                 return redirect('orders/'.Input::get('hash').'/edit/approver');
             } else {
                 return redirect('orders/'.Input::get('hash').'/edit');
             }
-        }
-    }
-
-    /***
-     * Compute total amount of items
-     * @param $products
-     * @param $quantities
-     * @param $unit_prices
-     * @return int
-     */
-    private function computeTotalAmount($products, $quantities, $unit_prices)
-    {
-        if (is_array($products)){
-            $total = 0;
-            foreach ($products as $key=>$product){
-                $total += $quantities[$key] * $unit_prices[$key];
-            }
-            return $total;
         } else {
-            return 0;
+            Session::flash('error_message', $response);
+            return Redirect::back()->withInput(Input::all());
         }
     }
 
     public function updateStatus(Order $order, $status)
     {
-        // Check if current status is pending
-        $current_status = $order->status()->orderBy('created_at', 'desc')->first()->status->name;
-        if ($current_status != 'Pending'){
-            Session::flash('error_message', "Unable to change order status. Current status is not pending ($current_status).");
+        $response = $this->dispatch(new UpdateOrderStatus($order, Auth::user(), $status, Input::get('extra')));
+
+        if ($response instanceof Order){
+            Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was '.strtolower($status).'.');
+            return redirect('orders');
+        } else {
+            Session::flash('error_message', $response);
             return Redirect::back()->withInput(Input::all());
         }
-
-        // For disapproval/cancellation, check if extra is not empty
-        if ($status == 'Disapproved' || $status == 'Cancelled'){
-            if (trim(Input::get('extra')) == ''){
-                Session::flash('error_message', "Please provide reason for cancellation/disapproval.");
-                return Redirect::back()->withInput(Input::all());
-            }
-        }
-
-        // For approval, check if user credits is more than or equal to total amount
-        $total = 0;
-        if ($status == 'Approved'){
-            $details = $order->details;
-            $credits = $order->customer->credit->credit_remaining;
-
-            foreach ($details as $detail){
-                $total += $detail->quantity * $detail->unit_price;
-            }
-
-            if ($total > $credits){
-                Session::flash('error_message', "Total amount ($total) exceed remaining credits of customer ($credits).");
-                return Redirect::back()->withInput(Input::all());
-            }
-        }
-
-        // Save status
-        Order_Order_Status::create([
-            'order_id' => $order->id,
-            'status_id' => Order_Status::where('name', 'like', $status)->first()->id,
-            'user_id' => Auth::user()->id,
-            'extra' => strip_tags(Input::get('extra'))
-        ]);
-
-        // Subtract total amount to customer credits
-        $credit = Customer::find($order->customer_id)->credit;
-        $credit->credit_remaining -= $total;
-        $credit->update();
-
-        // Redirect to list of orders
-        Session::flash('success', 'Order with PO Number "'.$order->po_number.'" was '.strtolower($status).'.');
-        return redirect('orders');
     }
 }

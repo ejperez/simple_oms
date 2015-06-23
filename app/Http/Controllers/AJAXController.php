@@ -16,16 +16,29 @@ class AJAXController extends Controller {
 
     public function getUserOrderPendingCount(User $user)
     {
-        $data = DB::table('orders_vw')
-            ->where('customer_id', '=', $user->id)
-            ->where('status', '=', 'Pending', 'AND')
-            ->select([
-                'po_number',
-                'order_date',
-                DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
-            ])
-            ->orderBy('days', 'asc')
-            ->get();
+        // If user is approver, get all
+        if ($user->hasRole('Approver')){
+            $data = DB::table('orders_vw')
+                ->where('status', '=', 'Pending')
+                ->select([
+                    'po_number',
+                    'order_date',
+                    DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
+                ])
+                ->orderBy('days', 'asc')
+                ->get();
+        } else {
+            $data = DB::table('orders_vw')
+                ->where('customer_id', '=', $user->id)
+                ->where('status', '=', 'Pending', 'AND')
+                ->select([
+                    'po_number',
+                    'order_date',
+                    DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
+                ])
+                ->orderBy('days', 'asc')
+                ->get();
+        }
 
         // Segregate nearly expired orders from expired pending orders
         // Limit orders fetched to save performance
@@ -56,7 +69,12 @@ class AJAXController extends Controller {
 
     public function getUserOrderCountStatus(User $user)
     {
-        $data = DB::select(DB::raw('SELECT ov.status as label, COUNT(0) AS count, COUNT(0) AS total, ROUND((COUNT(0) / t.cnt * 100), 2) AS value, t.cnt AS total FROM orders_vw ov CROSS JOIN (SELECT COUNT(*) AS cnt FROM orders_vw WHERE customer_id = ?) t WHERE customer_id = ? GROUP BY ov.status'), [$user->id, $user->id]);
+        // If user is approver, get all
+        if ($user->hasRole('Approver')){
+            $data = DB::select(DB::raw('SELECT ov.status as label, COUNT(0) AS count, COUNT(0) AS total, ROUND((COUNT(0) / t.cnt * 100), 2) AS value, t.cnt AS total FROM orders_vw ov CROSS JOIN (SELECT COUNT(*) AS cnt FROM orders_vw) t GROUP BY ov.status'));
+        } else {
+            $data = DB::select(DB::raw('SELECT ov.status as label, COUNT(0) AS count, COUNT(0) AS total, ROUND((COUNT(0) / t.cnt * 100), 2) AS value, t.cnt AS total FROM orders_vw ov CROSS JOIN (SELECT COUNT(*) AS cnt FROM orders_vw WHERE customer_id = ?) t WHERE customer_id = ? GROUP BY ov.status'), [$user->id, $user->id]);
+        }
 
         return json_encode($data);
     }
