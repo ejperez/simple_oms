@@ -87,6 +87,8 @@ class UpdateOrder extends Command implements SelfHandling
                 $order_details->save();
             }
 
+            \SimpleOMS\Audit_Log::create(['user_id' => \Auth::user()->id, 'activity' => 'Updated order with PO '.$this->order->po_number, 'data' => json_encode($this->order->toArray())]);
+
             return $this->order;
         }
 	}

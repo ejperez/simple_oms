@@ -5,10 +5,8 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\Registrar;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Http\Request;
-use SimpleOMS\Role;
-use Redirect;
+use SimpleOMS\Audit_Log;
 use Session;
-use Auth;
 
 class AuthController extends Controller {
 
@@ -52,10 +50,33 @@ class AuthController extends Controller {
         abort(404);
     }
 
+    public function postLogin(Request $request)
+    {
+        $this->validate($request, [
+            'email' => 'required|email', 'password' => 'required',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+
+        if ($this->auth->attempt($credentials, $request->has('remember')))
+        {
+            Audit_Log::create(['user_id' => $this->auth->user()->id, 'activity' => 'User logged in.', 'data' => null]);
+
+            return redirect()->intended($this->redirectPath());
+        }
+
+        return redirect($this->loginPath())
+            ->withInput($request->only('email', 'remember'))
+            ->withErrors([
+                'email' => $this->getFailedLoginMessage(),
+            ]);
+    }
+
     public function getLogout()
     {
-        Auth::logout();
+        Audit_Log::create(['user_id' => $this->auth->user()->id, 'activity' => 'User logged out.', 'data' => null]);
         Session::flush();
-        return Redirect::to('/');
+        $this->auth->logout();
+        return redirect(property_exists($this, 'redirectAfterLogout') ? $this->redirectAfterLogout : '/');
     }
 }

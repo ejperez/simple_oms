@@ -13,19 +13,23 @@ class CreateUser extends Command implements SelfHandling
     protected $role_id;
     protected $customer;
     protected $company_id;
+    protected $password;
+    protected $credits;
 
 	/**
 	 * Create a new command instance.
 	 *
 	 * @return void
 	 */
-	public function __construct($name, $email, $role_id, array $customer, $company_id)
+	public function __construct($name, $email, $role_id, $password, $credits, array $customer, $company_id)
 	{
         $this->name        = $name;
         $this->email       = $email;
         $this->role_id     = $role_id;
         $this->customer    = $customer;
         $this->company_id  = $company_id;
+        $this->password    = $password;
+        $this->credits     = $credits;
 	}
 
 	/**
@@ -39,7 +43,7 @@ class CreateUser extends Command implements SelfHandling
         $user->fill([
             'name'      => $this->name,
             'email'     => $this->email,
-            'password'  => Hash::make(DEFAULT_PW),
+            'password'  => Hash::make($this->password),
             'role_id'   => $this->role_id
         ]);
         // Save user profile
@@ -61,10 +65,12 @@ class CreateUser extends Command implements SelfHandling
             $credit = new Customer_Credit();
             $credit->fill([
                 'customer_id'       => $user->id,
-                'credit_remaining'  => DEFAULT_CREDIT
+                'credit_remaining'  => $this->credits
             ]);
             $credit->save();
         }
+
+        \SimpleOMS\Audit_Log::create(['user_id' => \Auth::user()->id, 'activity' => 'Created user '.$user->name, 'data' => json_encode($user->toArray())]);
 
         return $user;
 	}

@@ -11,10 +11,10 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+Route::get('/', 'HomeController@index');
 Route::controllers([
     'auth' => 'Auth\AuthController',
-    'password' => 'Auth\PasswordController',
+    'password' => 'Auth\PasswordController'
 ]);
 
 /*
@@ -53,6 +53,8 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['administrator']], 
 
     // store user action
     Route::post('users', 'UsersController@store');
+
+    Route::get('audit', 'AuditController@index');
 });
 
 /*

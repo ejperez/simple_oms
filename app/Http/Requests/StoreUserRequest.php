@@ -34,6 +34,8 @@ class StoreUserRequest extends Request {
                     'role_id' => 'required|exists:roles,id',
                     'customer.first_name' => 'required',
                     'customer.last_name' => 'required',
+                    'password' => 'confirmed|min:6',
+                    'credits' => 'required|numeric'
                 ];
             }
             case 'PUT':

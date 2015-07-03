@@ -1,6 +1,6 @@
-@extends('app')
+@extends('layout.private')
 
-@section('content')
+@section('inner-content')
 
 @if (isset($order))
     @if (isset($role) && $role == 'Approver')
@@ -9,9 +9,20 @@
         {!! Form::model($order, ['url' =>  url('orders').'/'.SimpleOMS\Helpers\Helpers::hash($order->id), 'method' => 'put', 'name' => 'order_form', 'id' => 'order_form']) !!}
     @endif
     {!! Form::hidden('hash', SimpleOMS\Helpers\Helpers::hash($order->id)) !!}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Edit Order</h3>
+        </div>
+    </div>
 @else
     {!! Form::open(['url' => url('orders'), 'name' => 'order_form', 'id' => 'order_form']) !!}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Create Order</h3>
+        </div>
+    </div>
 @endif
+
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-default">
@@ -105,7 +116,7 @@
                 </table>
 
                 <div id="div_total_amount" class="panel panel-default">
-                    <div class="panel-heading">
+                    <div class="panel-body">
                         <table>
                             <tr>
                                 <td width="80%"><label for="">Current Credits: {{ PESO_SYMBOL }}</label></td>

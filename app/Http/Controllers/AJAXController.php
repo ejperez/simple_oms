@@ -4,6 +4,7 @@ use SimpleOMS\Product_Category;
 use SimpleOMS\Http\Requests;
 use SimpleOMS\Order;
 use SimpleOMS\User;
+use SimpleOMS\Helpers\Helpers;
 use DB;
 
 class AJAXController extends Controller {
@@ -16,29 +17,24 @@ class AJAXController extends Controller {
 
     public function getUserOrderPendingCount(User $user)
     {
+        $data = DB::table('orders_vw');
+
         // If user is approver, get all
         if ($user->hasRole('Approver')){
-            $data = DB::table('orders_vw')
-                ->where('status', '=', 'Pending')
-                ->select([
-                    'po_number',
-                    'order_date',
-                    DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
-                ])
-                ->orderBy('days', 'asc')
-                ->get();
+            $data->where('status', '=', 'Pending');
         } else {
-            $data = DB::table('orders_vw')
-                ->where('customer_id', '=', $user->id)
-                ->where('status', '=', 'Pending', 'AND')
-                ->select([
-                    'po_number',
-                    'order_date',
-                    DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
-                ])
-                ->orderBy('days', 'asc')
-                ->get();
+            $data->where('customer_id', '=', $user->id)
+                ->where('status', '=', 'Pending', 'AND');
         }
+
+        $data = $data->select([
+            'id',
+            'po_number',
+            'order_date',
+            DB::raw('TIMESTAMPDIFF(DAY, NOW(), order_date) as days')
+        ])
+            ->orderBy('days', 'asc')
+            ->get();
 
         // Segregate nearly expired orders from expired pending orders
         // Limit orders fetched to save performance
@@ -47,6 +43,8 @@ class AJAXController extends Controller {
         $limit = 10;
 
         foreach ($data as $item){
+            // Hash id
+            $item->id = Helpers::hash($item->id);
             if ($item->days < 0){
                 if (count($expired) < $limit){
                     // Use absolute value of days
@@ -109,7 +107,7 @@ class AJAXController extends Controller {
             'credits' => $order->customer->credit->credit(),
             'updated_by' => isset($userUpdate) ? $customer->fullName() : null,
             'updated_at' => isset($userUpdate) ? $order->updated_at->format(DATE_FORMAT_PHP) : null,
-            'update_remarks' => isset($userUpdate) ? $order->update_remarks : null,
+            'update_remarks' => isset($userUpdate) ? ($order->update_remarks == '' ? 'No remarks' : $order->update_remarks) : null,
             'details' => $details_array,
             'status' => $latest_status->status->name,
             'user' => $latest_status->user->customer->fullName(),

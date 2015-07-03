@@ -1,11 +1,21 @@
-@extends('app')
+@extends('layout.private')
 
-@section('content')
+@section('inner-content')
 @if (isset($user))
     {!! Form::model($user, ['url' =>  url('users/'.$hash), 'method' => 'put', 'name' => 'update_form', 'id' => 'update_form']) !!}
     {!! Form::hidden('hash', SimpleOMS\Helpers\Helpers::hash($user->id)) !!}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Edit User</h3>
+        </div>
+    </div>
 @else
     {!! Form::open(['url' => url('users'), 'name' => 'register_form', 'id' => 'register_form']) !!}
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Create User</h3>
+        </div>
+    </div>
 @endif
 <div class="row">
     <div class="col-md-3">
@@ -15,8 +25,8 @@
                 {!! Form::text('name', Input::old('name'), [ 'id' => "name", 'class' => "form-control", 'maxlength' => "50", 'required' => "required" ]) !!}
             </div>
             <div class="col-md-12">
-                <label class="required">E-Mail Address</label>
-                {!! Form::text('email', Input::old('email'), [ 'id' => "email", 'class' => "form-control", 'maxlength' => "255", 'required' => "required" ]) !!}
+                <label class="required">E-mail Address</label>
+                {!! Form::email('email', Input::old('email'), [ 'id' => "email", 'class' => "form-control", 'maxlength' => "255", 'required' => "required" ]) !!}
             </div>
             @if (isset($user))
                 <div class="col-md-12">
@@ -37,12 +47,12 @@
                 </div>
             @else
                 <div class="col-md-12">
-                    <label>Password</label><br/>
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            <label>Default password is: "{{ DEFAULT_PW }}".<br/>User will be asked to change password on first login.</label>
-                        </div>
-                    </div>
+                    <label class="required">New Password</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                <div class="col-md-12">
+                    <label class="required">Confirm Password</label>
+                    <input type="password" class="form-control" name="password_confirmation" required>
                 </div>
                 <div class="col-md-12">
                     <label class="required">Role</label><br/>
@@ -52,6 +62,10 @@
                             {{ $role->name }}
                         </label>&nbsp;&nbsp;&nbsp;
                     @endforeach
+                </div>
+                <div class="col-md-12">
+                    <label class="required">Credits</label>
+                    {!! Form::input('number', 'credits', ( Input::has('credits') ? Input::old('credits') : DEFAULT_CREDIT), [ 'id' => "credits", 'class' => "form-control", 'required' => "required" ]) !!}
                 </div>
             @endif
         </div>

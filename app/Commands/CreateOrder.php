@@ -78,6 +78,8 @@ class CreateOrder extends Command implements SelfHandling
                 'user_id'   => $this->user->id
             ]);
 
+            \SimpleOMS\Audit_Log::create(['user_id' => \Auth::user()->id, 'activity' => 'Created order with PO '.$order->po_number, 'data' => json_encode($order->toArray())]);
+
             return $order;
         }
 	}

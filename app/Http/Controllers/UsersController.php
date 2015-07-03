@@ -53,9 +53,7 @@ class UsersController extends Controller
         // Get order status
         $roles = Role::all();
 
-        $title = 'List of Users';
-
-        return view('users.index', compact('title', 'users', 'role', 'roles', 'filters'));
+        return view('users.index', compact('users', 'role', 'roles', 'filters', 'sort_column', 'sort_direction'));
     }
     /**
      * Show create user form
@@ -66,9 +64,7 @@ class UsersController extends Controller
         // Get list of roles
         $roles = Role::all();
 
-        $title = 'Register User';
-
-        return view('auth.register', compact('roles', 'title'));
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -100,11 +96,9 @@ class UsersController extends Controller
         // Get customer record
         $user->customer;
 
-        $title = 'Update User';
-
         $hash = Helpers::hash($user->id);
 
-        return view('auth.register', compact('user', 'title', 'hash'));
+        return view('users.create', compact('user', 'hash'));
     }
 
     /**

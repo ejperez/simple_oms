@@ -62,6 +62,8 @@ class UpdateUser extends Command implements SelfHandling
         ]);
         $customer->update();
 
+        \SimpleOMS\Audit_Log::create(['user_id' => \Auth::user()->id, 'activity' => 'Updated user '.$this->user->name, 'data' => json_encode($this->user->toArray())]);
+
         return $this->user;
 	}
 }

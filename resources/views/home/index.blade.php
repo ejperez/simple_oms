@@ -1,6 +1,12 @@
-@extends('app')
+@extends('layout.private')
 
-@section('content')
+@section('inner-content')
+<div class="row">
+    <div class="col-md-12">
+        <h3>Dashboard</h3>
+    </div>
+</div>
+
 <div class="row">
 	<div class="col-md-4">
 		<div class="panel panel-default">
@@ -9,7 +15,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div id="canvas-holder">
-                            <canvas id="orders-count-by-status-chart-area" width="385" height="300"/>
+                            <canvas id="orders-count-by-status-chart-area" style="width:100%;height:300px"/>
                         </div>
                     </div>
                     <div class="col-md-12">
@@ -35,6 +41,10 @@
 </div>
 
 @section('js')
+
+    @include('partials.modal')
+    @include('partials.order_details_status')
+
     <script id="legends-template" type="text/x-handlebars-template">
         @{{#each dataset}}
         <div class="row">
@@ -58,7 +68,7 @@
 
     <script id="orders-list-template" type="text/x-handlebars-template">
         <h5>@{{ title }}</h5>
-        <table class="table table-condensed table-striped">
+        <table class="table table-condensed table-striped table-selectable table-order-view">
             <thead>
                 <th>PO Number</th>
                 <th>Order Date</th>
@@ -66,7 +76,7 @@
             </thead>
             <tbody>
                 @{{#each dataset}}
-                <tr>
+                <tr data-order-id="@{{ id }}">
                     <td>@{{ po_number }}</td>
                     <td>@{{ order_date }}</td>
                     <td>@{{ days }}</td>
@@ -91,8 +101,36 @@
             Disapproved:    '#FF5A5E'
         };
 
+        delay_load = true;
+
         $(document).ready(function(){
-            $.get('get-user-order-count-status/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
+            $.when(getUserOrderPendingCount(), getUserOrderCountStatus()).done(function(){
+                showLoadingScreen(false);
+            });
+        });
+
+        function getUserOrderPendingCount(){
+            return $.get('get-user-order-pending-count/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
+                data = JSON.parse(data);
+
+                $("#near-expiration-orders").html(orders_list({
+                    dataset: data.near_expired,
+                    title: 'Top ' + data.limit + ' Orders Near Expiration',
+                    days_label: 'Days Left'
+                }));
+
+                $("#expired-orders").html(orders_list({
+                    dataset: data.expired,
+                    title: 'Top Expired ' + data.limit + ' Orders',
+                    days_label: 'Days Passed'
+                }));
+            }).fail(function(){
+                alert('Failed to get details.');
+            });
+        }
+
+        function getUserOrderCountStatus(){
+            return $.get('get-user-order-count-status/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
                 var ctr = 0,
                         dataset = JSON.parse(data);
 
@@ -124,26 +162,8 @@
             }).fail(function(){
                 alert('Failed to get details.');
             });
-
-            $.get('get-user-order-pending-count/{{ SimpleOMS\Helpers\Helpers::hash(Auth::user()->id) }}', {}, function(data){
-                data = JSON.parse(data);
-
-                $("#near-expiration-orders").html(orders_list({
-                    dataset: data.near_expired,
-                    title: 'Top ' + data.limit + ' Orders Near Expiration',
-                    days_label: 'Days Left'
-                }));
-
-                $("#expired-orders").html(orders_list({
-                    dataset: data.expired,
-                    title: 'Top Expired ' + data.limit + ' Orders',
-                    days_label: 'Days Passed'
-                }));
-            }).fail(function(){
-                alert('Failed to get details.');
-            });
-        });
+        }
     </script>
 @endsection('js')
 
-@endsection('content')
+@endsection

@@ -75,6 +75,8 @@ class UpdateOrderStatus extends Command implements SelfHandling
         $credit->credit_remaining -= $total;
         $credit->update();
 
+        \SimpleOMS\Audit_Log::create(['user_id' => \Auth::user()->id, 'activity' => 'Updated status of order with PO '.$this->order->po_number.' to '.$this->status, 'data' => null]);
+
         return $this->order;
 	}
 }

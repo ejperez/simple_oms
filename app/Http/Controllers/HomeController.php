@@ -1,5 +1,7 @@
 <?php namespace SimpleOMS\Http\Controllers;
 
+use Auth;
+
 class HomeController extends Controller {
 
 	/*
@@ -30,7 +32,9 @@ class HomeController extends Controller {
 	 */
 	public function index()
     {
-        $title = 'Dashboard';
-        return view('home', compact('title'));
+        // Get role
+        $role = Auth::user()->role->name;
+
+        return view('home.index', compact('role'));
     }
 }

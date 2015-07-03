@@ -78,9 +78,7 @@ class OrdersController extends Controller {
         // Get order status
         $status = Order_Status::all();
 
-        $title = 'List of Orders';
-
-		return view('orders.index', compact('orders', 'role', 'title', 'status', 'filters'));
+		return view('orders.index', compact('orders', 'role', 'status', 'filters', 'sort_column', 'sort_direction'));
 	}
 
     /**
@@ -99,9 +97,7 @@ class OrdersController extends Controller {
         // Get remaining credit
         $credit = Auth::user()->customer->credit->credit_remaining;
 
-        $title = 'Create Order';
-
-        return view('orders.create', compact('errors', 'categories', 'credit', 'title'));
+        return view('orders.create', compact('errors', 'categories', 'credit'));
     }
 
     /***
@@ -165,16 +161,14 @@ class OrdersController extends Controller {
         // Get role of current user
         $role = Auth::user()->role->name;
 
-        $title = 'Edit Order';
-
         // Get remaining credit of customer of order
         if ($order->customer_id == Auth::user()->id){
             $credit = Auth::user()->customer->credit->credit_remaining;
-            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'title', 'role'));
+            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'credit', 'role'));
         } else {
             $customer = Customer::find($order->customer_id);
             $credit = $customer->credit->credit_remaining;
-            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'customer', 'credit', 'title', 'role'));
+            return view('orders.create', compact('order', 'errors', 'categories', 'items', 'customer', 'credit', 'role'));
         }
     }
 

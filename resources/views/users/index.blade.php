@@ -1,30 +1,31 @@
-@extends('app')
+@extends('layout.private')
 
-@section('content')
+@section('inner-content')
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
+            <h3>List of Users</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
             <table id="tbl_users" class="table table-condensed table-striped table-selectable" cellspacing="0">
                 <thead>
                 <tr>
                     <th>User Name
-                        <a title="Sort ascending" href="{{ URL::action('UsersController@index', ['s' => 'username', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Sort descending" href="{{ URL::action('UsersController@index', ['s' => 'username', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="{{ ($sort_column == 'username' && $sort_direction == 'desc' ? 'Sort ascending' : 'Sort descending') }}" href="{{ URL::action('UsersController@index', ['s' => 'username', 'd' => ($sort_column == 'username' && $sort_direction == 'desc' ? 'asc' : 'desc'), 'f' => Input::get('f') ]) }}"><img src="../build/images/sort_both.png" alt=""/></a>
                     </th>
                     <th>Email
-                        <a title="Sort ascending" href="{{ URL::action('UsersController@index', ['s' => 'email', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Sort descending" href="{{ URL::action('UsersController@index', ['s' => 'email', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="{{ ($sort_column == 'email' && $sort_direction == 'desc' ? 'Sort ascending' : 'Sort descending') }}" href="{{ URL::action('UsersController@index', ['s' => 'email', 'd' => ($sort_column == 'email' && $sort_direction == 'desc' ? 'asc' : 'desc'), 'f' => Input::get('f') ]) }}"><img src="../build/images/sort_both.png" alt=""/></a>
                     </th>
                     <th>Role
-                        <a title="Sort ascending" href="{{ URL::action('UsersController@index', ['s' => 'role', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Sort descending" href="{{ URL::action('UsersController@index', ['s' => 'role', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="{{ ($sort_column == 'role' && $sort_direction == 'desc' ? 'Sort ascending' : 'Sort descending') }}" href="{{ URL::action('UsersController@index', ['s' => 'role', 'd' => ($sort_column == 'role' && $sort_direction == 'desc' ? 'asc' : 'desc'), 'f' => Input::get('f') ]) }}"><img src="../build/images/sort_both.png" alt=""/></a>
                     </th>
                     <th>Name
-                        <a title="Sort ascending" href="{{ URL::action('UsersController@index', ['s' => 'name', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Sort descending" href="{{ URL::action('UsersController@index', ['s' => 'name', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="{{ ($sort_column == 'name' && $sort_direction == 'desc' ? 'Sort ascending' : 'Sort descending') }}" href="{{ URL::action('UsersController@index', ['s' => 'name', 'd' => ($sort_column == 'name' && $sort_direction == 'desc' ? 'asc' : 'desc'), 'f' => Input::get('f') ]) }}"><img src="../build/images/sort_both.png" alt=""/></a>
                     </th>
                     <th>Created Date
-                        <a title="Sort ascending" href="{{ URL::action('UsersController@index', ['s' => 'created_at', 'd' => 'asc', 'f' => Input::get('f') ]) }}"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                        <a title="Sort descending" href="{{ URL::action('UsersController@index', ['s' => 'created_at', 'd' => 'desc', 'f' => Input::get('f')]) }}"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                        <a title="{{ ($sort_column == 'created_at' && $sort_direction == 'desc' ? 'Sort ascending' : 'Sort descending') }}" href="{{ URL::action('UsersController@index', ['s' => 'created_at', 'd' => ($sort_column == 'created_at' && $sort_direction == 'desc' ? 'asc' : 'desc'), 'f' => Input::get('f') ]) }}"><img src="../build/images/sort_both.png" alt=""/></a>
                     </th>
                 </tr>
                 </thead>
@@ -32,12 +33,7 @@
                 <tr>
                     <th colspan="5" class="text-right">
                         {!! $users->appends(['s' => Input::get('s'), 'd' => Input::get('d'), 'f' => Input::get('f'),])->render() !!}
-                    </th>
-                </tr>
-                <tr>
-                    <th colspan="7" class="text-right">
-                        {{ 'Shown: '.(count($users)) }}
-                        {{ 'Total: '.$users->total() }}
+                        <div>{{ 'Shown: '.(count($users)) . ' ' . 'Total: '.$users->total() }}</div>
                     </th>
                 </tr>
                 </tfoot>
@@ -54,7 +50,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Filters</h3>
@@ -81,14 +77,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- The Modal -->
-    <div id="modal" class="modal fade" role="dialog" data-keyboard="false">
-        <div class="modal-dialog modal-lg">
-            <!-- Modal content-->
-            <div class="modal-content"></div>
         </div>
     </div>
 
